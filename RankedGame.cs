@@ -75,6 +75,8 @@ namespace HQMRanked
             RedditReporter.Instance.PostGameResult(GameInfo.RedScore, GameInfo.BlueScore, RedTeam, BlueTeam, 0);
             RedditReporter.Instance.UpdateRatings();
             ResetGame();
+            GameInfo.IsGameOver = true;
+            Tools.PauseGame();
         }
 
         public void ResetGame()

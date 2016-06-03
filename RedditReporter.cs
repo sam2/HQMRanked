@@ -80,7 +80,7 @@ namespace HQMRanked
             TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
             DateTime easternTime = TimeZoneInfo.ConvertTimeFromUtc(timeUtc, easternZone);
 
-            Reddit.GetSubreddit("hqmgames").SubmitTextPost(easternTime.ToString(), post);
+            Reddit.GetSubreddit("hqmgames").SubmitTextPost(HQMEditorDedicated.ServerInfo.Name + " - "+easternTime.ToString() + " | " + redScore +" - "+blueScore, post);
                 
             
         }
