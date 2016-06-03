@@ -52,7 +52,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RankedGame.cs" />
-    <Compile Include="UserData.cs" />
+    <Compile Include="RatingCalculator.cs" />
+    <Compile Include="UserSaveData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

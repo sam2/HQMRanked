@@ -8,64 +8,115 @@ using HQMEditorDedicated;
 namespace HQMRanked
 {
     class LoginManager
-    {
-        public static Dictionary<string, User> AllUsers;
+    {      
+        public static List<RankedPlayer> LoggedInPlayers = new List<RankedPlayer>();
 
-        public static List<User> LoggedInUsers = new List<User>();
-
-        public static bool Login(string name, string password)
+        public static void HandleNewLogins(Command cmd)
         {
-            User u;
-            if(AllUsers.TryGetValue(name, out u))
+            if (cmd.Cmd == "join" && cmd.Args.Length > 0)
             {
-                if(LoggedInUsers.Contains(u))
+                if (LoginManager.Login(cmd.Sender, cmd.Args[0]))
+                {
+                    return;
+                }
+                else
+                {
+                    LoginManager.CreateNewUser(cmd.Sender.Name, cmd.Args[0]);
+                    LoginManager.Login(cmd.Sender, cmd.Args[0]);
+                    UserSaveData.SaveUserData();
+                }
+            }
+        }
+
+        public static RankedPlayer IsLoggedIn(Player p)
+        {
+            foreach(RankedPlayer rp in LoggedInPlayers)
+            {
+                if (rp.HQMPlayer.Slot == p.Slot)
+                    return rp;
+            }
+            return null;
+        }
+
+        static bool Login(Player player, string password)
+        {
+            UserData u;
+            if(UserSaveData.AllUserData.TryGetValue(player.Name, out u))
+            {
+                RankedPlayer rankedPlayer = new RankedPlayer(player, u);
+                if(LoggedInPlayers.Where(x=> x.HQMPlayer.Name == player.Name).Count() > 0)
                 {
                     Chat.SendMessage(u.Name + " is already logged in.");
                 }
                 else if(u.Password == password)
                 {
                     Chat.SendMessage(u.Name + " is now logged in.");
-                    LoggedInUsers.Add(u);                    
+                    LoggedInPlayers.Add(rankedPlayer);                    
                 } 
                 else
                 {
-                    Chat.SendMessage(u.Name + "- wrong Password.");
+                    Chat.SendMessage(u.Name + " - wrong password.");
                 }                
                 return true;
             }
             return false;
         }
 
-        public static bool CreateNewUser(string name, string password)
+        static bool CreateNewUser(string name, string password)
         {
             if(password == "")
             {
                 Chat.SendMessage("invalid password");
+                return false;
             }
-            User u;
-            if (AllUsers.TryGetValue(name, out u))
+            UserData u;
+            if (UserSaveData.AllUserData.TryGetValue(name, out u))
             {
                 Console.WriteLine("User " + u.Name + " already exists.");
                 return false;
             }
-            u = new User(name, password, Moserware.Skills.GameInfo.DefaultGameInfo.DefaultRating);
-            AllUsers[u.Name] = u;
+            u = new UserData(name, password, Moserware.Skills.GameInfo.DefaultGameInfo.DefaultRating);
+            UserSaveData.AllUserData[u.Name] = u;
             Chat.SendMessage("New user " + name + " has been created.");
             return true;
         }       
+
+        public static void UpdateLoggedInPlayers()
+        {
+            LoggedInPlayers.RemoveAll(player => !player.HQMPlayer.InServer);
+        }
     }
 
-    public class User
+    public class UserData
     {
         public string Name;
         public string Password;
+        public int GamesPlayed;
+        public int Goals;
+        public int Assists;
         public Moserware.Skills.Rating Rating;
 
-        public User(string name, string pw, Moserware.Skills.Rating r)
+        public UserData(string name, string pw, Moserware.Skills.Rating r, int gamesPlayed = 0, int goals = 0, int assists = 0)
         {
             Name = name;
             Password = pw;
             Rating = r;
+            GamesPlayed = gamesPlayed;
+            Goals = goals;
+            Assists = assists;
+        }
+    }
+
+    public class RankedPlayer
+    {
+        public Player HQMPlayer;
+        public UserData UserData;
+        public HQMTeam AssignedTeam = HQMTeam.NoTeam;
+
+        public RankedPlayer(Player p, UserData u)
+        {
+            HQMPlayer = p;
+            UserData = u;
         }
     }
 

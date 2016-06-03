@@ -11,7 +11,7 @@ namespace HQMRanked
     {
         static void Main(string[] args)
         {
-            int MIN_PLAYER_COUNT = 10;
+            
 
             Console.WriteLine("Looking for server...");
             while (!MemoryEditor.Init()) { }
@@ -20,48 +20,57 @@ namespace HQMRanked
             CommandListener cmdListener = new CommandListener(Chat.MessageCount);
             Chat.RecordCommandSource();
 
-            LoginManager.AllUsers = UserData.ReadUserData();
+            Console.WriteLine("Reading user data...");
+            UserSaveData.AllUserData = UserSaveData.ReadUserData();
+            Console.WriteLine("done.");
 
             Tools.PauseGame();
-            Chat.SendMessage("Waiting for players... Type /join <password> to play.");
-            Chat.SendMessage("New? check reddit.com/r/hqmgames for details");
+          
 
             RankedGame game = new RankedGame();
-            //Chat.FlushLastCommand();
+            Chat.FlushLastCommand();
 
+            WelcomeMessage();
             while(true)
             {
-                if(!game.InProgress)
+                if(game.InProgress)
+                    game.RemoveTrespassers();
+                
+                LoginManager.UpdateLoggedInPlayers();
+                Command cmd = cmdListener.NewCommand();
+                if (cmd != null)
                 {
-                    Command cmd = cmdListener.NewCommand();
-                    if (cmd != null)
+                    LoginManager.HandleNewLogins(cmd);
+                    if(cmd.Cmd == "start")
                     {
-                        if (cmd.Cmd == "join" && cmd.Args.Length > 0)
-                        {
-                            if (LoginManager.Login(cmd.Sender.Name, cmd.Args[0]))
-                            {
-                                Chat.SendMessage("Waiting for players... - " + LoginManager.LoggedInUsers.Count + "/" + MIN_PLAYER_COUNT);
-                            }
-                            else
-                            {
-                                LoginManager.CreateNewUser(cmd.Sender.Name, cmd.Args[0]);                                
-                                LoginManager.Login(cmd.Sender.Name, cmd.Args[0]);
-                                UserData.SaveUserData(LoginManager.AllUsers);
-                            }
-                        }                        
-                        Chat.FlushLastCommand();
-                    }
-
-                    
-
-                    if(LoginManager.LoggedInUsers.Count >= MIN_PLAYER_COUNT)
-                    {
-                        Chat.SendMessage("Player count reached. Game will begin shortly.");
                         game.StartGame();
                     }
+                    if(cmd.Cmd == "end")
+                    {
+                        game.EndGame();
+                    }
+                    Chat.FlushLastCommand();
                 }
+
+
+
+                /*
+                if (LoginManager.LoggedInPlayers.Count >= MIN_PLAYER_COUNT)
+                {
+                    Chat.SendMessage("Player count reached. Game will begin shortly.");
+                    game.StartGame();
+                }                
+                 * */
                 
             }
+        }
+
+        static void WelcomeMessage()
+        {
+            Chat.SendMessage("-----------------------------------------------------------------------------");
+            Chat.SendMessage("Waiting for players... Type /join <password> to play.");
+            Chat.SendMessage("   New? check reddit.com/r/hqmgames for details");
+            Chat.SendMessage("-----------------------------------------------------------------------------");
         }
     }
 }
