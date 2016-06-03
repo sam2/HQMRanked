@@ -17,8 +17,10 @@ namespace HQMRanked
             while (!MemoryEditor.Init()) { }
             Console.WriteLine("Server found.");
 
-            CommandListener cmdListener = new CommandListener();
-            LoginManager.Users = UserData.ReadUserData();
+            CommandListener cmdListener = new CommandListener(Chat.MessageCount);
+            Chat.RecordCommandSource();
+
+            LoginManager.AllUsers = UserData.ReadUserData();
 
             Tools.PauseGame();
             Chat.SendMessage("Waiting for players... Type /join <password> to play.");
@@ -32,21 +34,25 @@ namespace HQMRanked
                 if(!game.InProgress)
                 {
                     Command cmd = cmdListener.NewCommand();
-                    if (cmd != null && cmd.Cmd == "join" && cmd.Args.Length > 0)
+                    if (cmd != null)
                     {
-                        if(LoginManager.Login(cmd.Sender.Name, cmd.Args[0]))
+                        if (cmd.Cmd == "join" && cmd.Args.Length > 0)
                         {
-                            Chat.SendMessage(cmd.Sender.Name + " has logged in. - " + LoginManager.LoggedInUsers.Count +"/"+ MIN_PLAYER_COUNT);
-                        }
-                        else
-                        {
-                            LoginManager.CreateNewUser(cmd.Sender.Name, cmd.Args[0]);
-                            Chat.SendMessage("New user " + cmd.Sender.Name + " has been created.");
-                            LoginManager.Login(cmd.Sender.Name, cmd.Args[0]);
+                            if (LoginManager.Login(cmd.Sender.Name, cmd.Args[0]))
+                            {
+                                Chat.SendMessage("Waiting for players... - " + LoginManager.LoggedInUsers.Count + "/" + MIN_PLAYER_COUNT);
+                            }
+                            else
+                            {
+                                LoginManager.CreateNewUser(cmd.Sender.Name, cmd.Args[0]);                                
+                                LoginManager.Login(cmd.Sender.Name, cmd.Args[0]);
+                                UserData.SaveUserData(LoginManager.AllUsers);
+                            }
                         }                        
+                        Chat.FlushLastCommand();
                     }
 
-                    //at.FlushLastCommand();
+                    
 
                     if(LoginManager.LoggedInUsers.Count >= MIN_PLAYER_COUNT)
                     {

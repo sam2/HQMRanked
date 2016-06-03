@@ -11,9 +11,9 @@ namespace HQMRanked
     {
         int messageCount;
 
-        public CommandListener()
+        public CommandListener(int msgCount)
         {
-            messageCount = Chat.MessageCount;
+            messageCount = msgCount;
         }
 
         public Command NewCommand()
