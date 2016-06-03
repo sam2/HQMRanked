@@ -71,8 +71,10 @@ namespace HQMRanked
             else
                 RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 1, 1);
             
-            ResetGame();
+            
+            RedditReporter.Instance.PostGameResult(GameInfo.RedScore, GameInfo.BlueScore, RedTeam, BlueTeam, 0);
             RedditReporter.Instance.UpdateRatings();
+            ResetGame();
         }
 
         public void ResetGame()
