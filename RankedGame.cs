@@ -45,12 +45,34 @@ namespace HQMRanked
             }
             
             if(GameInfo.RedScore > GameInfo.BlueScore)
+            {                
+                foreach(RankedPlayer p in RedTeam)
+                {
+                    UserData u;
+                    if (UserSaveData.AllUserData.TryGetValue(p.HQMPlayer.Name, out u))
+                    {
+                        u.Wins++;
+                    }
+                }
                 RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 1, 2);
+            }                
             else if(GameInfo.BlueScore > GameInfo.RedScore)
+            {                
+                foreach (RankedPlayer p in BlueTeam)
+                {
+                    UserData u;
+                    if (UserSaveData.AllUserData.TryGetValue(p.HQMPlayer.Name, out u))
+                    {
+                        u.Wins++;
+                    }
+                }
                 RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 2, 1);
+            }                
             else
                 RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 1, 1);
+            
             ResetGame();
+            RedditReporter.Instance.UpdateRatings();
         }
 
         public void ResetGame()

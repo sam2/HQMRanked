@@ -28,7 +28,7 @@ namespace HQMRanked
           
 
             RankedGame game = new RankedGame();
-            Chat.FlushLastCommand();
+            Chat.FlushLastCommand();         
 
             WelcomeMessage();
             while(true)
