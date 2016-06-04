@@ -9,7 +9,7 @@ namespace HQMRanked
 {
     public class RankedGame
     {
-        int MIN_PLAYER_COUNT = 10;
+        public static int MIN_PLAYER_COUNT = 6;
 
         public bool InProgress = false;
 
@@ -19,18 +19,19 @@ namespace HQMRanked
         IEnumerable<IDictionary<Moserware.Skills.Player, Moserware.Skills.Rating>> TrueSkillTeamModel;
 
         public void StartGame()
-        {           
-            ResetGame();            
+        {
+            InProgress = true;
+            ClearTeams();         
             RemoveTrespassers();
             CreateTeams();
             TrueSkillTeamModel = RatingCalculator.BuildTeamModel(RedTeam, BlueTeam);
-            Chat.SendMessage("Game Starting with match quality " + RatingCalculator.CalculateMatchQuality(TrueSkillTeamModel));
-            InProgress = true;
+            Chat.SendMessage("Game Starting with match quality " + Math.Round(RatingCalculator.CalculateMatchQuality(TrueSkillTeamModel), 2));            
             Tools.ResumeGame();
         }
 
         public void EndGame()
         {
+            
             Chat.SendMessage("Game over. Check reddit.com/r/hqmgames for results");
             var allPlayers = RedTeam.Concat(BlueTeam);
             foreach(RankedPlayer p in allPlayers)
@@ -74,16 +75,11 @@ namespace HQMRanked
             
             RedditReporter.Instance.PostGameResult(GameInfo.RedScore, GameInfo.BlueScore, RedTeam, BlueTeam, 0);
             RedditReporter.Instance.UpdateRatings();
-            ResetGame();
+            ClearTeams();
             GameInfo.IsGameOver = true;
             Tools.PauseGame();
-        }
-
-        public void ResetGame()
-        {
-            ClearTeams();
             InProgress = false;
-        }
+        }      
 
         public void RemoveTrespassers()
         {
@@ -132,7 +128,6 @@ namespace HQMRanked
             //auto join
             while (SortedRankedPlayers.Where(p => p.HQMPlayer.Team == HQMTeam.NoTeam).Count() > 0)
             {
-                RemoveTrespassers();
                 foreach (RankedPlayer p in SortedRankedPlayers.Where(p => p.HQMPlayer.Team == HQMTeam.NoTeam))
                 {
                     p.HQMPlayer.LockoutTime = 0;

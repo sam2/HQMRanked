@@ -17,7 +17,6 @@ namespace HQMRanked
             {
                 if (LoginManager.Login(cmd.Sender, cmd.Args[0]))
                 {
-                    Chat.SendMessage(LoggedInPlayers.Count + " players logged in.");
                     return;
                 }
                 else
