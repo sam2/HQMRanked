@@ -12,11 +12,40 @@ namespace HQMRanked
         public static int MIN_PLAYER_COUNT = 6;
 
         public bool InProgress = false;
+        public bool StartingGame
+        {
+            get;
+            private set;
+        } = false;
 
         List<RankedPlayer> RedTeam;
         List<RankedPlayer> BlueTeam;
 
         IEnumerable<IDictionary<Moserware.Skills.Player, Moserware.Skills.Rating>> TrueSkillTeamModel;
+        System.Timers.Timer _timer;
+
+        public void StartGameTimer()
+        {
+            _timer = new System.Timers.Timer(20000);
+            _timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
+            _timer.AutoReset = false;
+            _timer.Enabled = true;
+            StartingGame = true;
+        }
+
+        void TimerElapsed(object sender, EventArgs e)
+        {
+            if (LoginManager.LoggedInPlayers.Count < MIN_PLAYER_COUNT)
+            {
+                Chat.SendMessage("Not enough players. Aborting game...");
+            }
+            else
+            {
+                StartGame();
+            }
+            _timer.Enabled = false;
+            StartingGame = false;
+        }
 
         public void StartGame()
         {
@@ -79,16 +108,25 @@ namespace HQMRanked
             GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;
-        }      
+        }
 
+        const int PLAYER_LIST_ADDRESS = 0x00530A60;
+        const int PLAYER_STRUCT_SIZE = 0x98;
+        const int TEAM_OFFSET = 0x8;
+        const int LEG_STATE_OFFSET = 0x74;
         public void RemoveTrespassers()
-        {
-            foreach(Player p in PlayerManager.PlayersInServer)
+        {         
+            int maxPlayers = ServerInfo.MaxPlayerCount;
+            for(int i = 0; i < maxPlayers; i++)
             {
-                RankedPlayer rp = LoginManager.IsLoggedIn(p);               
-                if( (rp == null || p.Team != rp.AssignedTeam) && p.Team != HQMTeam.NoTeam)
-                {
-                    p.LegState = 32;
+               if(MemoryEditor.ReadInt(PLAYER_LIST_ADDRESS + i * PLAYER_STRUCT_SIZE) == 1)
+               {
+                    HQMTeam t = (HQMTeam)MemoryEditor.ReadInt(PLAYER_LIST_ADDRESS + i * PLAYER_STRUCT_SIZE + TEAM_OFFSET);
+                    RankedPlayer rp = LoginManager.IsLoggedIn(i);
+                    if ((rp == null || t != rp.AssignedTeam) && t != HQMTeam.NoTeam)
+                    {
+                        MemoryEditor.WriteInt(32, PLAYER_LIST_ADDRESS + i * PLAYER_STRUCT_SIZE + LEG_STATE_OFFSET);
+                    }
                 }
             }
         }

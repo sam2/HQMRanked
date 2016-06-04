@@ -15,6 +15,7 @@ namespace HQMRanked
         {
             if (cmd.Cmd == "join" && cmd.Args.Length > 0)
             {
+                RemoveLoggedOutPlayers();
                 if (LoginManager.Login(cmd.Sender, cmd.Args[0]))
                 {
                     return;
@@ -28,11 +29,11 @@ namespace HQMRanked
             }
         }
 
-        public static RankedPlayer IsLoggedIn(Player p)
+        public static RankedPlayer IsLoggedIn(int slot)
         {
             foreach(RankedPlayer rp in LoggedInPlayers)
             {
-                if (rp.HQMPlayer.Slot == p.Slot)
+                if (rp.HQMPlayer.Slot == slot)
                     return rp;
             }
             return null;
@@ -81,7 +82,7 @@ namespace HQMRanked
             return true;
         }       
 
-        public static void UpdateLoggedInPlayers()
+        public static void RemoveLoggedOutPlayers()
         {
             LoggedInPlayers.RemoveAll(player => !player.HQMPlayer.InServer);
         }

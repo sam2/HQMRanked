@@ -9,9 +9,6 @@ namespace HQMRanked
 {
     class Program
     {
-        static RankedGame game = new RankedGame();
-        static bool startingGame = false;
-
         static void Main(string[] args)
         {           
 
@@ -26,13 +23,15 @@ namespace HQMRanked
             UserSaveData.AllUserData = UserSaveData.ReadUserData();
             Console.WriteLine("done.");
 
-            Tools.PauseGame();        
-            
+            Tools.PauseGame();
+            RankedGame game = new RankedGame();
             Chat.FlushLastCommand();
             
             while(true)
             {
-                game.RemoveTrespassers();
+                if(game.InProgress || game.StartingGame)
+                    game.RemoveTrespassers();
+
                 if (game.InProgress)
                 {                    
                     if(GameInfo.IsGameOver)
@@ -42,15 +41,14 @@ namespace HQMRanked
                 }
                 else
                 {
-                    if(LoginManager.LoggedInPlayers.Count >= RankedGame.MIN_PLAYER_COUNT && !startingGame && GameInfo.Period == 0)
+                    LoginManager.RemoveLoggedOutPlayers();
+                    if (LoginManager.LoggedInPlayers.Count >= RankedGame.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period == 0)
                     {
-                        startingGame = true;
-                        StartGameTimer();
+                        game.StartGameTimer();
                         Chat.SendMessage("---Required player count reached. Game will begin shortly.---");                        
                     }
-                }                    
-                
-                LoginManager.UpdateLoggedInPlayers();
+                }                   
+
                 Command cmd = cmdListener.NewCommand();
                 if (cmd != null)
                 {
@@ -77,31 +75,6 @@ namespace HQMRanked
             Chat.SendMessage("----------------------------------------------------------------------------------");
         }
 
-        static void StartGameTimer()
-        {
-            System.Timers.Timer _timer;
-            _timer = new System.Timers.Timer(20000);
-
-            _timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
-            _timer.AutoReset = false;
-            _timer.Enabled = true;
-        }   
-
-        static void TimerElapsed(object sender, EventArgs e)
-        {
-            
-            if (LoginManager.LoggedInPlayers.Count < RankedGame.MIN_PLAYER_COUNT)
-            {
-                Chat.SendMessage("Not enough players. Aborting game...");
-                WelcomeMessage();
-                return;
-            }
-            else
-            {
-                game.StartGame();
-            }            
-            startingGame = false;
-        }
-
+        
     }
 }
