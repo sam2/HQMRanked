@@ -9,6 +9,7 @@ namespace HQMRanked
 {
     public class RankedGame
     {
+        
         public static int MIN_PLAYER_COUNT = 6;
 
         public bool InProgress = false;
@@ -134,6 +135,7 @@ namespace HQMRanked
                         }
                     }
                 }
+                Thread.Sleep(Util.TRESSPASS_REMOVER_SLEEP);
             }
             
         }
