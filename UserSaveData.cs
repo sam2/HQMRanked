@@ -51,6 +51,28 @@ namespace HQMRanked
         }
     }
 
+    public class UserData
+    {
+        public string Name;
+        public string Password;
+        public int GamesPlayed;
+        public int Wins;
+        public int Goals;
+        public int Assists;
+        public Moserware.Skills.Rating Rating;
+
+        public UserData(string name, string pw, Moserware.Skills.Rating r, int gamesPlayed = 0, int wins = 0, int goals = 0, int assists = 0)
+        {
+            Name = name;
+            Password = pw;
+            Rating = r;
+            GamesPlayed = gamesPlayed;
+            Wins = wins;
+            Goals = goals;
+            Assists = assists;
+        }
+    }
+
    
 
     

@@ -9,31 +9,30 @@ namespace HQMRanked
 {
     class RatingCalculator
     {
-        static GameInfo gameInfo = GameInfo.DefaultGameInfo;
-        public static IEnumerable<IDictionary<Player, Rating>> BuildTeamModel(List<RankedPlayer> RedTeam, List<RankedPlayer> BlueTeam)
+        public static GameInfo GameInfo = GameInfo.DefaultGameInfo;
+        public static IEnumerable<IDictionary<Player, Rating>> BuildTeamModel(List<string> RedTeam, List<string> BlueTeam)
         {         
             var redTeam = new Team();
-            foreach(RankedPlayer p in RedTeam)
+            foreach(string p in RedTeam)
             {
-                redTeam.AddPlayer(new Player(p.HQMPlayer.Name), p.UserData.Rating);
+                redTeam.AddPlayer(new Player(p), UserSaveData.AllUserData[p].Rating);
             }
 
             var blueTeam = new Team();
-            foreach(RankedPlayer p in BlueTeam)
+            foreach(string p in BlueTeam)
             {
-                blueTeam.AddPlayer(new Player(p.HQMPlayer.Name), p.UserData.Rating);
+                blueTeam.AddPlayer(new Player(p), UserSaveData.AllUserData[p].Rating);
             }
             return Teams.Concat(redTeam, blueTeam);            
         }
 
         public static double CalculateMatchQuality(IEnumerable < IDictionary < Player, Rating >> teamModel)
         {
-            return TrueSkillCalculator.CalculateMatchQuality(gameInfo, teamModel);
+            return TrueSkillCalculator.CalculateMatchQuality(GameInfo, teamModel);
         }
 
-        public static void ApplyNewRatings(IEnumerable<IDictionary<Player, Rating>> teamModel, int redRank, int blueRank)
+        public static void ApplyNewRatings(IDictionary<Player, Rating> newRatings)
         {
-            IDictionary<Player, Rating> newRatings = TrueSkillCalculator.CalculateNewRatings(gameInfo, teamModel, redRank, blueRank);
             foreach(KeyValuePair<Player, Rating> kvp in newRatings)
             {
                 UserData u;
@@ -45,8 +44,6 @@ namespace HQMRanked
                     Console.WriteLine("could not find player: " + (string)kvp.Key.Id);
             }
             UserSaveData.SaveUserData();
-
-           
         }
 
         

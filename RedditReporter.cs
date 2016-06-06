@@ -49,20 +49,20 @@ namespace HQMRanked
             post.EditText(text);            
         }
 
-        public void PostGameResult(int redScore, int blueScore, List<RankedPlayer> redTeam, List<RankedPlayer> blueTeam, double matchQuality)
+        public void PostGameResult(int redScore, int blueScore, List<string> redTeam, List<string> blueTeam, double matchQuality, IDictionary<Moserware.Skills.Player, Moserware.Skills.Rating> newRatings)
         {
-            string redtext = "| RED | G | A | \n ----------|----------|----------\n";
+            string redtext = "| RED | G | A | RATING CHANGE \n ----------|----------|----------|----------\n";
             for(int i = 0; i < redTeam.Count; i++)
             {
-                HQMEditorDedicated.Player p = redTeam[i].HQMPlayer;
-                redtext += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + '\n';
+                HQMEditorDedicated.Player p = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == redTeam[i]).PlayerStruct;
+                redtext += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + UserSaveData.AllUserData[redTeam[i]].Rating.ToString() + "=>" + newRatings.Where(x => x.Key.Id == redTeam[i]).ToString() + '\n';
             }
 
-            string blueText = "| BLUE | G | A | \n ----------|----------|----------\n";
+            string blueText = "| BLUE | G | A | RATING CHANGE \n ----------|----------|----------|----------\n";
             for(int i = 0; i < blueTeam.Count; i++)
             {
-                HQMEditorDedicated.Player p = blueTeam[i].HQMPlayer;
-                blueText += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + '\n';
+                HQMEditorDedicated.Player p = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == redTeam[i]).PlayerStruct;
+                blueText += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + UserSaveData.AllUserData[blueTeam[i]].Rating.ToString() + "=>" + newRatings.Where(x => x.Key.Id == p.Name).ToString() + '\n';
             }
 
             string post = "";

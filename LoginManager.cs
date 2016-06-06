@@ -29,14 +29,9 @@ namespace HQMRanked
             }
         }
 
-        public static RankedPlayer IsLoggedIn(int slot)
+        public static RankedPlayer IsLoggedIn(string name)
         {
-            foreach(RankedPlayer rp in LoggedInPlayers)
-            {
-                if (rp.HQMPlayer.Slot == slot)
-                    return rp;
-            }
-            return null;
+            return LoggedInPlayers.FirstOrDefault(x => x.Name == name);
         }
 
         static bool Login(Player player, string password)
@@ -44,10 +39,15 @@ namespace HQMRanked
             UserData u;
             if(UserSaveData.AllUserData.TryGetValue(player.Name, out u))
             {
-                RankedPlayer rankedPlayer = new RankedPlayer(player, u);
-                if(LoggedInPlayers.Where(x=> x.HQMPlayer.Name == player.Name).Count() > 0)
+                RankedPlayer rankedPlayer = new RankedPlayer(player.Name, player.IPAddress, player, u);
+                if(LoggedInPlayers.FirstOrDefault(x=> x.Name == player.Name) != null)
                 {
                     Chat.SendMessage(u.Name + " is already logged in.");
+                }
+                else if(LoggedInPlayers.FirstOrDefault(x=> x.IP.SequenceEqual(player.IPAddress)) != null)
+                {
+                    string name = LoggedInPlayers.FirstOrDefault(x => x.IP.SequenceEqual(player.IPAddress)).Name;
+                    Chat.SendMessage("Failed to log in "+u.Name+", "+name +" is already logged in from that IP.");
                 }
                 else if(u.Password == password)
                 {
@@ -85,41 +85,23 @@ namespace HQMRanked
         public static void RemoveLoggedOutPlayers()
         {
             byte[] playerList = MemoryEditor.ReadBytes(Util.PLAYER_LIST_ADDRESS, Util.MAX_PLAYERS * Util.PLAYER_STRUCT_SIZE);
-            LoggedInPlayers.RemoveAll(p => playerList[p.HQMPlayer.Slot * Util.PLAYER_STRUCT_SIZE] == 0);           
+            LoggedInPlayers.RemoveAll(p => playerList[p.PlayerStruct.Slot * Util.PLAYER_STRUCT_SIZE] == 0);           
         }
-    }
-
-    public class UserData
-    {
-        public string Name;
-        public string Password;
-        public int GamesPlayed;
-        public int Wins;
-        public int Goals;
-        public int Assists;
-        public Moserware.Skills.Rating Rating;
-
-        public UserData(string name, string pw, Moserware.Skills.Rating r, int gamesPlayed = 0, int wins = 0, int goals = 0, int assists = 0)
-        {
-            Name = name;
-            Password = pw;
-            Rating = r;
-            GamesPlayed = gamesPlayed;
-            Wins = wins;
-            Goals = goals;
-            Assists = assists;
-        }
-    }
+    }    
 
     public class RankedPlayer
     {
-        public Player HQMPlayer;
+        public string Name;
+        public byte[] IP;
+        public Player PlayerStruct;
         public UserData UserData;
         public HQMTeam AssignedTeam = HQMTeam.NoTeam;
 
-        public RankedPlayer(Player p, UserData u)
+        public RankedPlayer(string n, byte[] ip, Player p, UserData u)
         {
-            HQMPlayer = p;
+            Name = n;
+            IP = ip;
+            PlayerStruct = p;
             UserData = u;
         }
     }

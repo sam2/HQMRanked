@@ -115,11 +115,8 @@ namespace HQMRanked
 
         static void WelcomeMessage()
         {
-            Chat.SendMessage("----------------------------------------------------------------------------------");
             Chat.SendMessage("          Waiting for players... "+LoginManager.LoggedInPlayers.Count + " / "+RankedGame.MIN_PLAYER_COUNT);
             Chat.SendMessage("        Type /join <password> to play");
-            Chat.SendMessage("   New? check reddit.com/r/hqmgames for details");
-            Chat.SendMessage("----------------------------------------------------------------------------------");
         }
 
         
