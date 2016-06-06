@@ -49,13 +49,13 @@ namespace HQMRanked
         }
 
         public void StartGame()
-        {
-            InProgress = true;
+        {            
             ClearTeams();         
             CreateTeams();
             TrueSkillTeamModel = RatingCalculator.BuildTeamModel(RedTeam, BlueTeam);
             Chat.SendMessage("Game Starting with match quality " + Math.Round(RatingCalculator.CalculateMatchQuality(TrueSkillTeamModel), 2));            
             Tools.ResumeGame();
+            InProgress = true;
         }
 
         public void EndGame(bool record)
