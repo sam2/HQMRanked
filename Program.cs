@@ -61,11 +61,11 @@ namespace HQMRanked
                     {
                         game.StartGame();
                     }
-                    if(cmd.Cmd == "end" && cmd.Sender.IsAdmin)
+                    else if(cmd.Cmd == "end" && cmd.Sender.IsAdmin)
                     {
                         game.EndGame(false);
                     }
-                    if (cmd.Cmd == "tf" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    else if (cmd.Cmd == "tf" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
                     {
                         int num = 0;
                         if (int.TryParse(cmd.Args[0], out num))
@@ -74,7 +74,7 @@ namespace HQMRanked
                             Chat.SendMessage("trespasser remove freq set to " + num);
                         }
                     }
-                    if (cmd.Cmd == "mp" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    else if (cmd.Cmd == "mp" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
                     {
                         int num = 0;
                         if (int.TryParse(cmd.Args[0], out num))
@@ -84,7 +84,7 @@ namespace HQMRanked
                         }
                         
                     }
-                    if (cmd.Cmd == "st" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    else if (cmd.Cmd == "st" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
                     {
                         int num = 0;
                         if (int.TryParse(cmd.Args[0], out num))
@@ -93,7 +93,7 @@ namespace HQMRanked
                             Chat.SendMessage("thread sleep set to " + num);
                         }
                     }
-                    if (cmd.Cmd == "mg" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    else if (cmd.Cmd == "mg" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
                     {
                         int num = 0;
                         if(int.TryParse(cmd.Args[0], out num))
@@ -102,9 +102,19 @@ namespace HQMRanked
                             Chat.SendMessage("min games set to " + num);
                         }                        
                     }
-                    if(cmd.Cmd == "info" && (!game.InProgress || game.StartingGame))
+                    else if(cmd.Cmd == "info" && (!game.InProgress || game.StartingGame))
                     {
                         WelcomeMessage();
+                    }
+                    else if(cmd.Cmd == "logout")
+                    {
+                        RankedPlayer p = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == cmd.Sender.Name));
+                        if(p!=null)
+                        {
+                            LoginManager.LoggedInPlayers.Remove(p);
+                            Chat.SendMessage(p.Name + " logged out.");
+                        }
+                            
                     }
                     Chat.FlushLastCommand();
                 }
