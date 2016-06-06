@@ -107,7 +107,7 @@ namespace HQMRanked
                     }
                     else if(cmd.Cmd == "logout")
                     {
-                        RankedPlayer p = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == cmd.Sender.Name));
+                        RankedPlayer p = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == cmd.Sender.Name);
                         if(p!=null)
                         {
                             LoginManager.LoggedInPlayers.Remove(p);

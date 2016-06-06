@@ -169,7 +169,7 @@ namespace HQMRanked
 
             //split up goalies
             List<RankedPlayer> SortedRankedPlayers = players.OrderByDescending(x => x.UserData.Rating.ConservativeRating).ToList();
-            List<RankedPlayer> goalies = SortedRankedPlayers.Where(x => x.PlayerStruct.Position == HQMEditorDedicated.HQMRole.g);
+            List<RankedPlayer> goalies = SortedRankedPlayers.Where(x => x.PlayerStruct.Role == HQMEditorDedicated.HQMRole.G).ToList();
             if(goalies.Count >= 2)
             {
                 RedTeam.Add(goalies[0].Name);               
