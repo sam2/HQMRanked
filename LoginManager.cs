@@ -84,7 +84,8 @@ namespace HQMRanked
 
         public static void RemoveLoggedOutPlayers()
         {
-            LoggedInPlayers.RemoveAll(player => !player.HQMPlayer.InServer);
+            byte[] playerList = MemoryEditor.ReadBytes(Util.PLAYER_LIST_ADDRESS, Util.MAX_PLAYERS * Util.PLAYER_STRUCT_SIZE);
+            LoggedInPlayers.RemoveAll(p => playerList[p.HQMPlayer.Slot * Util.PLAYER_STRUCT_SIZE] == 0);           
         }
     }
 

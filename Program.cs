@@ -16,6 +16,8 @@ namespace HQMRanked
             while (!MemoryEditor.Init()) { }
             Console.WriteLine("Server found.");
 
+            Util.MAX_PLAYERS = ServerInfo.MaxPlayerCount;
+
             CommandListener cmdListener = new CommandListener(Chat.MessageCount);
             Chat.RecordCommandSource();
 
@@ -27,11 +29,8 @@ namespace HQMRanked
             RankedGame game = new RankedGame();
             Chat.FlushLastCommand();
 
-
             Thread removeTresspassers = new Thread(game.RemoveTrespassers);
-            removeTresspassers.Start();
-
-            
+            removeTresspassers.Start();            
             
             while(true)
             {              
@@ -44,14 +43,15 @@ namespace HQMRanked
                 }
                 else
                 {
-                    if(LoginManager.LoggedInPlayers.Count > 0)
-                        LoginManager.RemoveLoggedOutPlayers();
+                    
                     if (LoginManager.LoggedInPlayers.Count >= RankedGame.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period == 0)
                     {
                         game.StartGameTimer();
                         Chat.SendMessage("---Required player count reached. Game will begin shortly.---");                        
                     }
-                }                   
+                }
+                if (LoginManager.LoggedInPlayers.Count > 0)
+                    LoginManager.RemoveLoggedOutPlayers();
 
                 Command cmd = cmdListener.NewCommand();
                 if (cmd != null)
@@ -100,8 +100,11 @@ namespace HQMRanked
                         {
                             Util.LEADERBOARD_MIN_GAMES = num;
                             Chat.SendMessage("min games set to " + num);
-                        }
-                        
+                        }                        
+                    }
+                    if(cmd.Cmd == "info" && (!game.InProgress || game.StartingGame))
+                    {
+                        WelcomeMessage();
                     }
                     Chat.FlushLastCommand();
                 }
