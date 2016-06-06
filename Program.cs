@@ -42,8 +42,7 @@ namespace HQMRanked
                     }                    
                 }
                 else
-                {
-                    
+                {                    
                     if (LoginManager.LoggedInPlayers.Count >= RankedGame.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period == 0)
                     {
                         game.StartGameTimer();
@@ -84,7 +83,7 @@ namespace HQMRanked
                         }
                         
                     }
-                    else if (cmd.Cmd == "st" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    else if (cmd.Cmd == "ts" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
                     {
                         int num = 0;
                         if (int.TryParse(cmd.Args[0], out num))

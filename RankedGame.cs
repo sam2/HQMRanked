@@ -150,12 +150,36 @@ namespace HQMRanked
 
 
         public void CreateTeams()
-        {                   
-            List<RankedPlayer> SortedRankedPlayers = LoginManager.LoggedInPlayers.OrderByDescending(x => x.UserData.Rating.ConservativeRating).ToList();
-            while(SortedRankedPlayers.Count > 10)
+        {
+            //give prio to people who didn't play last game
+            List<RankedPlayer> players = LoginManager.LoggedInPlayers.Where(x => !x.PlayedLastGame).ToList();
+            List<RankedPlayer> others = LoginManager.LoggedInPlayers.Except(players).ToList();
+            Random r = new Random();
+            while(players.Count < Math.Min(10, LoginManager.LoggedInPlayers.Count))
             {
-                SortedRankedPlayers.RemoveAt(new Random().Next(SortedRankedPlayers.Count));
+                RankedPlayer newPlayer = others[r.Next(others.Count)];
+                others.Remove(newPlayer);
+                players.Add(newPlayer);
             }
+
+            foreach(RankedPlayer p in LoginManager.LoggedInPlayers.Except(players))
+            {
+                p.PlayedLastGame = false;
+            }
+
+            //split up goalies
+            List<RankedPlayer> SortedRankedPlayers = players.OrderByDescending(x => x.UserData.Rating.ConservativeRating).ToList();
+            List<RankedPlayer> goalies = SortedRankedPlayers.Where(x => x.PlayerStruct.Position == HQMEditorDedicated.HQMRole.g);
+            if(goalies.Count >= 2)
+            {
+                RedTeam.Add(goalies[0].Name);               
+                RedTeam.Add(goalies[1].Name);
+                SortedRankedPlayers.Remove(goalies[0]);
+                SortedRankedPlayers.Remove(goalies[1]);
+                goalies[0].PlayedLastGame = true;
+                goalies[1].PlayedLastGame = true;
+            }
+            
 
             double half_max = Math.Ceiling((double)SortedRankedPlayers.Count() / 2);
 
@@ -176,7 +200,8 @@ namespace HQMRanked
                 {
                     RedTeam.Add(p.Name);
                     p.AssignedTeam = HQMTeam.Red;                 
-                }            
+                }
+                p.PlayedLastGame = true;
             }
 
             PrintTeams();
@@ -212,7 +237,7 @@ namespace HQMRanked
             double result = 0;
             foreach(string p in list)
             {
-                result += UserSaveData.AllUserData[p].Rating.Mean;
+                result += UserSaveData.AllUserData[p].Rating.ConservativeRating;
             }
             return result;
         }      

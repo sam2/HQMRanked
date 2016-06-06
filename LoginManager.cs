@@ -96,6 +96,7 @@ namespace HQMRanked
         public Player PlayerStruct;
         public UserData UserData;
         public HQMTeam AssignedTeam = HQMTeam.NoTeam;
+        public bool PlayedLastGame = false;
 
         public RankedPlayer(string n, byte[] ip, Player p, UserData u)
         {

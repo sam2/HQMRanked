@@ -44,11 +44,6 @@ namespace HQMRanked
                     Console.WriteLine("could not find player: " + (string)kvp.Key.Id);
             }
             UserSaveData.SaveUserData();
-        }
-
-        
-
-
-        
+        }        
     }
 }
