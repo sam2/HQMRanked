@@ -39,8 +39,12 @@ namespace HQMRanked
             int i = 1;
             foreach(UserData d in data)
             {
-                text += i + " | " + d.Name + " | " + Math.Round(d.Rating.ConservativeRating, 2) + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
-                i++;
+                if(d.GamesPlayed > Util.LEADERBOARD_MIN_GAMES)
+                {
+                    text += i + " | " + d.Name + " | " + Math.Round(d.Rating.ConservativeRating, 2) + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
+                    i++;
+                }
+                    
             }
             post.EditText(text);            
         }

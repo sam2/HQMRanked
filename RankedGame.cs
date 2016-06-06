@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using HQMEditorDedicated;
 
 namespace HQMRanked
@@ -26,7 +26,7 @@ namespace HQMRanked
 
         public void StartGameTimer()
         {
-            _timer = new System.Timers.Timer(20000);
+            _timer = new System.Timers.Timer(15000);
             _timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
             _timer.AutoReset = false;
             _timer.Enabled = true;
@@ -51,84 +51,91 @@ namespace HQMRanked
         {
             InProgress = true;
             ClearTeams();         
-            RemoveTrespassers();
             CreateTeams();
             TrueSkillTeamModel = RatingCalculator.BuildTeamModel(RedTeam, BlueTeam);
             Chat.SendMessage("Game Starting with match quality " + Math.Round(RatingCalculator.CalculateMatchQuality(TrueSkillTeamModel), 2));            
             Tools.ResumeGame();
         }
 
-        public void EndGame()
+        public void EndGame(bool record)
         {
             
             Chat.SendMessage("Game over. Check reddit.com/r/hqmgames for results");
-            var allPlayers = RedTeam.Concat(BlueTeam);
-            foreach(RankedPlayer p in allPlayers)
+            if(record)
             {
-                UserData u;
-                if(UserSaveData.AllUserData.TryGetValue(p.HQMPlayer.Name, out u))
+                var allPlayers = RedTeam.Concat(BlueTeam);
+                foreach (RankedPlayer p in allPlayers)
                 {
-                    u.Goals += p.HQMPlayer.Goals;
-                    u.Assists += p.HQMPlayer.Assists;
-                    u.GamesPlayed++;
+                    UserData u;
+                    if (UserSaveData.AllUserData.TryGetValue(p.HQMPlayer.Name, out u))
+                    {
+                        u.Goals += p.HQMPlayer.Goals;
+                        u.Assists += p.HQMPlayer.Assists;
+                        u.GamesPlayed++;
+                    }
                 }
+
+                if (GameInfo.RedScore > GameInfo.BlueScore)
+                {
+                    foreach (RankedPlayer p in RedTeam)
+                    {
+                        UserData u;
+                        if (UserSaveData.AllUserData.TryGetValue(p.HQMPlayer.Name, out u))
+                        {
+                            u.Wins++;
+                        }
+                    }
+                    RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 1, 2);
+                }
+                else if (GameInfo.BlueScore > GameInfo.RedScore)
+                {
+                    foreach (RankedPlayer p in BlueTeam)
+                    {
+                        UserData u;
+                        if (UserSaveData.AllUserData.TryGetValue(p.HQMPlayer.Name, out u))
+                        {
+                            u.Wins++;
+                        }
+                    }
+                    RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 2, 1);
+                }
+                else
+                    RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 1, 1);
+
+
+                RedditReporter.Instance.PostGameResult(GameInfo.RedScore, GameInfo.BlueScore, RedTeam, BlueTeam, 0);
+                RedditReporter.Instance.UpdateRatings();
             }
             
-            if(GameInfo.RedScore > GameInfo.BlueScore)
-            {                
-                foreach(RankedPlayer p in RedTeam)
-                {
-                    UserData u;
-                    if (UserSaveData.AllUserData.TryGetValue(p.HQMPlayer.Name, out u))
-                    {
-                        u.Wins++;
-                    }
-                }
-                RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 1, 2);
-            }                
-            else if(GameInfo.BlueScore > GameInfo.RedScore)
-            {                
-                foreach (RankedPlayer p in BlueTeam)
-                {
-                    UserData u;
-                    if (UserSaveData.AllUserData.TryGetValue(p.HQMPlayer.Name, out u))
-                    {
-                        u.Wins++;
-                    }
-                }
-                RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 2, 1);
-            }                
-            else
-                RatingCalculator.ApplyNewRatings(TrueSkillTeamModel, 1, 1);
-            
-            
-            RedditReporter.Instance.PostGameResult(GameInfo.RedScore, GameInfo.BlueScore, RedTeam, BlueTeam, 0);
-            RedditReporter.Instance.UpdateRatings();
             ClearTeams();
             GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;
         }
 
-        const int PLAYER_LIST_ADDRESS = 0x00530A60;
-        const int PLAYER_STRUCT_SIZE = 0x98;
-        const int TEAM_OFFSET = 0x8;
-        const int LEG_STATE_OFFSET = 0x74;
+
         public void RemoveTrespassers()
-        {         
-            int maxPlayers = ServerInfo.MaxPlayerCount;
-            for(int i = 0; i < maxPlayers; i++)
+        {
+            while(true)
             {
-               if(MemoryEditor.ReadInt(PLAYER_LIST_ADDRESS + i * PLAYER_STRUCT_SIZE) == 1)
-               {
-                    HQMTeam t = (HQMTeam)MemoryEditor.ReadInt(PLAYER_LIST_ADDRESS + i * PLAYER_STRUCT_SIZE + TEAM_OFFSET);
-                    RankedPlayer rp = LoginManager.IsLoggedIn(i);
-                    if ((rp == null || t != rp.AssignedTeam) && t != HQMTeam.NoTeam)
+                if (!InProgress && !StartingGame) continue;
+
+                int maxPlayers = ServerInfo.MaxPlayerCount;
+                for (int i = 0; i < maxPlayers; i++)
+                {
+                    byte[] playerMemory = MemoryEditor.ReadBytes(Util.PLAYER_LIST_ADDRESS + i * Util.PLAYER_STRUCT_SIZE, Util.PLAYER_STRUCT_SIZE);
+                    if (playerMemory[0] == 1)//in server
                     {
-                        MemoryEditor.WriteInt(32, PLAYER_LIST_ADDRESS + i * PLAYER_STRUCT_SIZE + LEG_STATE_OFFSET);
+                        HQMTeam t = (HQMTeam)playerMemory[Util.TEAM_OFFSET];
+                        RankedPlayer rp = LoginManager.IsLoggedIn(i);
+                        if ((rp == null || t != rp.AssignedTeam) && t != HQMTeam.NoTeam)
+                        {
+                            MemoryEditor.WriteInt(32, Util.PLAYER_LIST_ADDRESS + i * Util.PLAYER_STRUCT_SIZE + Util.LEG_STATE_OFFSET);
+                        }
                     }
                 }
             }
+            
         }
 
         public void CreateTeams()

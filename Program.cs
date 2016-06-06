@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using HQMEditorDedicated;
 
 namespace HQMRanked
@@ -26,22 +26,26 @@ namespace HQMRanked
             Tools.PauseGame();
             RankedGame game = new RankedGame();
             Chat.FlushLastCommand();
+
+
+            Thread removeTresspassers = new Thread(game.RemoveTrespassers);
+            removeTresspassers.Start();
+
+            
             
             while(true)
-            {
-                if(game.InProgress || game.StartingGame)
-                    game.RemoveTrespassers();
-
+            {              
                 if (game.InProgress)
                 {                    
                     if(GameInfo.IsGameOver)
                     {
-                        game.EndGame();
-                    }
+                        game.EndGame(true);
+                    }                    
                 }
                 else
                 {
-                    LoginManager.RemoveLoggedOutPlayers();
+                    if(LoginManager.LoggedInPlayers.Count > 0)
+                        LoginManager.RemoveLoggedOutPlayers();
                     if (LoginManager.LoggedInPlayers.Count >= RankedGame.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period == 0)
                     {
                         game.StartGameTimer();
@@ -59,11 +63,51 @@ namespace HQMRanked
                     }
                     if(cmd.Cmd == "end" && cmd.Sender.IsAdmin)
                     {
-                        game.EndGame();
+                        game.EndGame(false);
+                    }
+                    if (cmd.Cmd == "tf" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    {
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.TRESSPASS_REMOVER_SLEEP = num;
+                            Chat.SendMessage("trespasser remove freq set to " + num);
+                        }
+                    }
+                    if (cmd.Cmd == "mp" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    {
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Chat.SendMessage("min player set");
+                            RankedGame.MIN_PLAYER_COUNT = num;
+                        }
+                        
+                    }
+                    if (cmd.Cmd == "st" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    {
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.MAINTHREAD_SLEEP = num;
+                            Chat.SendMessage("thread sleep set to " + num);
+                        }
+                    }
+                    if (cmd.Cmd == "mg" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    {
+                        int num = 0;
+                        if(int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.LEADERBOARD_MIN_GAMES = num;
+                            Chat.SendMessage("min games set to " + num);
+                        }
+                        
                     }
                     Chat.FlushLastCommand();
-                }                
+                }
+                Thread.Sleep(Util.MAINTHREAD_SLEEP);
             }
+            
         }
 
         static void WelcomeMessage()
