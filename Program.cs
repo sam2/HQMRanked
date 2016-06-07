@@ -43,7 +43,7 @@ namespace HQMRanked
                 }
                 else
                 {                    
-                    if (LoginManager.LoggedInPlayers.Count >= RankedGame.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period == 0)
+                    if (LoginManager.LoggedInPlayers.Count >= Util.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period == 0)
                     {
                         game.StartGameTimer();
                         Chat.SendMessage("---Required player count reached. Game will begin shortly.---");                        
@@ -79,7 +79,7 @@ namespace HQMRanked
                         if (int.TryParse(cmd.Args[0], out num))
                         {
                             Chat.SendMessage("min player set");
-                            RankedGame.MIN_PLAYER_COUNT = num;
+                            Util.MIN_PLAYER_COUNT = num;
                         }
                         
                     }
@@ -124,7 +124,7 @@ namespace HQMRanked
 
         static void WelcomeMessage()
         {
-            Chat.SendMessage("          Waiting for players... "+LoginManager.LoggedInPlayers.Count + " / "+RankedGame.MIN_PLAYER_COUNT);
+            Chat.SendMessage("          Waiting for players... "+LoginManager.LoggedInPlayers.Count + " / "+Util.MIN_PLAYER_COUNT);
             Chat.SendMessage("        Type /join <password> to play");
         }
 

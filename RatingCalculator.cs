@@ -10,40 +10,25 @@ namespace HQMRanked
     class RatingCalculator
     {
         public static GameInfo GameInfo = GameInfo.DefaultGameInfo;
-        public static IEnumerable<IDictionary<Player, Rating>> BuildTeamModel(List<string> RedTeam, List<string> BlueTeam)
+        public static IEnumerable<IDictionary<string, Rating>> BuildTeamModel(List<string> RedTeam, List<string> BlueTeam)
         {         
-            var redTeam = new Team();
+            var redTeam = new Team<string>();
             foreach(string p in RedTeam)
             {
-                redTeam.AddPlayer(new Player(p), UserSaveData.AllUserData[p].Rating);
+                redTeam.AddPlayer(p, UserSaveData.AllUserData[p].Rating);
             }
 
-            var blueTeam = new Team();
+            var blueTeam = new Team<string>();
             foreach(string p in BlueTeam)
             {
-                blueTeam.AddPlayer(new Player(p), UserSaveData.AllUserData[p].Rating);
+                blueTeam.AddPlayer(p, UserSaveData.AllUserData[p].Rating);
             }
             return Teams.Concat(redTeam, blueTeam);            
         }
 
-        public static double CalculateMatchQuality(IEnumerable < IDictionary < Player, Rating >> teamModel)
+        public static double CalculateMatchQuality(IEnumerable<IDictionary<string, Rating>> teamModel)
         {
             return TrueSkillCalculator.CalculateMatchQuality(GameInfo, teamModel);
-        }
-
-        public static void ApplyNewRatings(IDictionary<Player, Rating> newRatings)
-        {
-            foreach(KeyValuePair<Player, Rating> kvp in newRatings)
-            {
-                UserData u;
-                if (UserSaveData.AllUserData.TryGetValue((string)kvp.Key.Id, out u))
-                {
-                    u.Rating = kvp.Value;
-                }
-                else
-                    Console.WriteLine("could not find player: " + (string)kvp.Key.Id);
-            }
-            UserSaveData.SaveUserData();
-        }        
+        }   
     }
 }

@@ -21,5 +21,7 @@ namespace HQMRanked
         public static int LEADERBOARD_MIN_GAMES;
         public static int MAINTHREAD_SLEEP = 100;
         public volatile static int TRESSPASS_REMOVER_SLEEP = 100;
+
+        public static int MIN_PLAYER_COUNT = 10;
     }
 }

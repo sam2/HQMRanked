@@ -9,10 +9,8 @@ namespace HQMRanked
 {
     public class RankedGame
     {
-        
-        public static int MIN_PLAYER_COUNT = 2;
-
         public bool InProgress = false;
+
         public bool StartingGame
         {
             get;
@@ -22,7 +20,10 @@ namespace HQMRanked
         List<string> RedTeam = new List<string>();
         List<string> BlueTeam = new List<string>();
 
-        IEnumerable<IDictionary<Moserware.Skills.Player, Moserware.Skills.Rating>> TrueSkillTeamModel;
+        RankedGameReport LastGameReport;
+
+        IEnumerable<IDictionary<string, Moserware.Skills.Rating>> TrueSkillTeamModel;
+        
         System.Timers.Timer _timer;
 
         public void StartGameTimer()
@@ -36,7 +37,7 @@ namespace HQMRanked
 
         void TimerElapsed(object sender, EventArgs e)
         {
-            if (LoginManager.LoggedInPlayers.Count < MIN_PLAYER_COUNT)
+            if (LoginManager.LoggedInPlayers.Count < Util.MIN_PLAYER_COUNT)
             {
                 Chat.SendMessage("Not enough players. Aborting game...");
             }
@@ -49,8 +50,8 @@ namespace HQMRanked
         }
 
         public void StartGame()
-        {            
-            ClearTeams();         
+        {
+            SetPlayedLastGame();
             CreateTeams();
             TrueSkillTeamModel = RatingCalculator.BuildTeamModel(RedTeam, BlueTeam);
             Chat.SendMessage("Game Starting with match quality " + Math.Round(RatingCalculator.CalculateMatchQuality(TrueSkillTeamModel), 2));            
@@ -61,57 +62,16 @@ namespace HQMRanked
         public void EndGame(bool record)
         {            
             Chat.SendMessage("Game over. Check reddit.com/r/hqmgames for results");
-            if(record)
-            {
-                IDictionary<Moserware.Skills.Player, Moserware.Skills.Rating> newRatings;
-                var allPlayers = RedTeam.Concat(BlueTeam);
-                foreach (string p in allPlayers)
-                {
-                    UserData u;
-                    if (UserSaveData.AllUserData.TryGetValue(p, out u))
-                    {
-                        RankedPlayer rp = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == p);
-                        if(rp != null)
-                        {
-                            u.Goals += rp.PlayerStruct.Goals;
-                            u.Assists += rp.PlayerStruct.Assists;
-                            u.GamesPlayed++;
-                        }
-                        
-                    }
-                }
+            LastGameReport = new RankedGameReport(RedTeam, BlueTeam, TrueSkillTeamModel);  
 
-                if (GameInfo.RedScore > GameInfo.BlueScore)
-                {
-                    foreach (string p in RedTeam)
-                    {
-                        UserData u;
-                        if (UserSaveData.AllUserData.TryGetValue(p, out u))
-                        {
-                            u.Wins++;
-                        }
-                    }
-                    newRatings = Moserware.Skills.TrueSkillCalculator.CalculateNewRatings(RatingCalculator.GameInfo, TrueSkillTeamModel, 1, 2);
-                    
-                }
-                else
-                {
-                    foreach (string p in BlueTeam)
-                    {
-                        UserData u;
-                        if (UserSaveData.AllUserData.TryGetValue(p, out u))
-                        {
-                            u.Wins++;
-                        }
-                    }
-                    newRatings = Moserware.Skills.TrueSkillCalculator.CalculateNewRatings(RatingCalculator.GameInfo, TrueSkillTeamModel, 2, 1);
-                }
-                
-                RedditReporter.Instance.PostGameResult(GameInfo.RedScore, GameInfo.BlueScore, RedTeam, BlueTeam, 0, newRatings);
-                RatingCalculator.ApplyNewRatings(newRatings);
+            if(record)
+            {                          
+                RedditReporter.Instance.PostGameResult(LastGameReport);
+                SavePlayerStats(LastGameReport);
                 RedditReporter.Instance.UpdateRatings();
             }
 
+            ClearTeams();   
             GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;
@@ -220,14 +180,10 @@ namespace HQMRanked
         {
             foreach(RankedPlayer p in LoginManager.LoggedInPlayers)
             {
-                p.AssignedTeam = HQMTeam.NoTeam;
-                if (RedTeam.Contains(p.Name) || BlueTeam.Contains(p.Name))
-                {
-                    p.PlayedLastGame = true;
-                }
-                else
-                    p.PlayedLastGame = false;
+                p.AssignedTeam = HQMTeam.NoTeam;               
             }
+            RedTeam = new List<string>();
+            BlueTeam = new List<string>();
         }
 
         double TotalRating(List<string> list)
@@ -255,6 +211,44 @@ namespace HQMRanked
             }
             Chat.SendMessage(red);
             Chat.SendMessage(blue);
+        }
+
+        private void SavePlayerStats(RankedGameReport report)
+        {
+            foreach(RankedGameReport.PlayerStatLine statline in report.PlayerStats)
+            {
+                UserData u;
+                if(UserSaveData.AllUserData.TryGetValue(statline.Name, out u))
+                {
+                    u.Goals += statline.Goals;
+                    u.Assists += statline.Assists;
+                    u.GamesPlayed++;
+                    if(statline.Team == report.Winner)
+                    {
+                        u.Wins++;
+                    }
+                    u.Rating = report.NewRatings[statline.Name];
+                }
+            }
+            UserSaveData.SaveUserData();
+        }
+
+        private void SetPlayedLastGame()
+        {
+            if (LastGameReport != null)
+            {
+                List<string> names = new List<string>();
+                foreach(RankedGameReport.PlayerStatLine sl in LastGameReport.PlayerStats)
+                {
+                    names.Add(sl.Name);
+                }
+
+                foreach(RankedPlayer rp in LoginManager.LoggedInPlayers)
+                {
+                    rp.PlayedLastGame = names.Contains(rp.Name);
+                }
+            }
+            
         }
     }
 }
