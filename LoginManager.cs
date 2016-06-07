@@ -44,7 +44,7 @@ namespace HQMRanked
                 {
                     Chat.SendMessage(u.Name + " is already logged in.");
                 }
-                else if(LoggedInPlayers.FirstOrDefault(x=> x.IP.SequenceEqual(player.IPAddress)) != null)
+                else if(LoggedInPlayers.FirstOrDefault(x=> x.IP.SequenceEqual(player.IPAddress)) != null && !player.IsAdmin)
                 {
                     string name = LoggedInPlayers.FirstOrDefault(x => x.IP.SequenceEqual(player.IPAddress)).Name;
                     Chat.SendMessage("Failed to log in "+u.Name+", "+name +" is already logged in from that IP.");

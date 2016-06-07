@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RedditSharp;
 using RedditSharp.Things;
+using Moserware.Skills;
 
 namespace HQMRanked
 {
@@ -49,20 +50,24 @@ namespace HQMRanked
             post.EditText(text);            
         }
 
-        public void PostGameResult(int redScore, int blueScore, List<string> redTeam, List<string> blueTeam, double matchQuality, IDictionary<Moserware.Skills.Player, Moserware.Skills.Rating> newRatings)
+        public void PostGameResult(int redScore, int blueScore, List<string> redTeam, List<string> blueTeam, double matchQuality, IDictionary<Player, Rating> newRatings)
         {
             string redtext = "| RED | G | A | RATING CHANGE \n ----------|----------|----------|----------\n";
             for(int i = 0; i < redTeam.Count; i++)
             {
                 HQMEditorDedicated.Player p = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == redTeam[i]).PlayerStruct;
-                redtext += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + UserSaveData.AllUserData[redTeam[i]].Rating.ToString() + "=>" + newRatings.Where(x => x.Key.Id == redTeam[i]).ToString() + '\n';
+                Rating oldRating = UserSaveData.AllUserData[redTeam[i]].Rating;
+                Rating newRating = newRatings.First(x => x.Key.Id.ToString() == redTeam[i]).Value;
+                redtext += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + GetRatingString(oldRating, newRating);
             }
 
             string blueText = "| BLUE | G | A | RATING CHANGE \n ----------|----------|----------|----------\n";
             for(int i = 0; i < blueTeam.Count; i++)
             {
-                HQMEditorDedicated.Player p = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == redTeam[i]).PlayerStruct;
-                blueText += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + UserSaveData.AllUserData[blueTeam[i]].Rating.ToString() + "=>" + newRatings.Where(x => x.Key.Id == p.Name).ToString() + '\n';
+                HQMEditorDedicated.Player p = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == blueTeam[i]).PlayerStruct;
+                Rating oldRating = UserSaveData.AllUserData[blueTeam[i]].Rating;
+                Rating newRating = newRatings.First(x => x.Key.Id.ToString() == blueTeam[i]).Value;
+                blueText += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + GetRatingString(oldRating, newRating);
             }
 
             string post = "";
@@ -85,8 +90,11 @@ namespace HQMRanked
             DateTime easternTime = TimeZoneInfo.ConvertTimeFromUtc(timeUtc, easternZone);
 
             Reddit.GetSubreddit("hqmgames").SubmitTextPost(HQMEditorDedicated.ServerInfo.Name + " - "+easternTime.ToString() + " | " + redScore +" - "+blueScore, post);
-                
-            
+        }
+
+        public string GetRatingString(Rating oldRating, Rating newRating)
+        {
+            return "**"+Math.Round(oldRating.ConservativeRating, 2)+ "**" + " (*" + oldRating.ToString() + "*)" + " => " + "**" + Math.Round(newRating.ConservativeRating, 2)+"**"+" (*" + newRating.ToString() + "*)" + '\n';
         }
     }
 }

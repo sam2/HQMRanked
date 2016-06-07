@@ -27,7 +27,7 @@ namespace HQMRanked
 
         public void StartGameTimer()
         {
-            _timer = new System.Timers.Timer(1000);
+            _timer = new System.Timers.Timer(5000);
             _timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
             _timer.AutoReset = false;
             _timer.Enabled = true;
@@ -111,8 +111,7 @@ namespace HQMRanked
                 RatingCalculator.ApplyNewRatings(newRatings);
                 RedditReporter.Instance.UpdateRatings();
             }
-            
-            ClearTeams();
+
             GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;
@@ -162,22 +161,18 @@ namespace HQMRanked
                 players.Add(newPlayer);
             }
 
-            foreach(RankedPlayer p in LoginManager.LoggedInPlayers.Except(players))
-            {
-                p.PlayedLastGame = false;
-            }
 
             //split up goalies
             List<RankedPlayer> SortedRankedPlayers = players.OrderByDescending(x => x.UserData.Rating.ConservativeRating).ToList();
-            List<RankedPlayer> goalies = SortedRankedPlayers.Where(x => x.PlayerStruct.Role == HQMEditorDedicated.HQMRole.G).ToList();
+            List<RankedPlayer> goalies = SortedRankedPlayers.Where(x => x.PlayerStruct.Role == HQMRole.G).ToList();
             if(goalies.Count >= 2)
             {
-                RedTeam.Add(goalies[0].Name);               
-                RedTeam.Add(goalies[1].Name);
+                RedTeam.Add(goalies[0].Name);
+                goalies[0].AssignedTeam = HQMTeam.Red;            
+                BlueTeam.Add(goalies[1].Name);
+                goalies[1].AssignedTeam = HQMTeam.Blue;
                 SortedRankedPlayers.Remove(goalies[0]);
                 SortedRankedPlayers.Remove(goalies[1]);
-                goalies[0].PlayedLastGame = true;
-                goalies[1].PlayedLastGame = true;
             }
             
 
@@ -201,15 +196,14 @@ namespace HQMRanked
                     RedTeam.Add(p.Name);
                     p.AssignedTeam = HQMTeam.Red;                 
                 }
-                p.PlayedLastGame = true;
             }
 
             PrintTeams();
 
             //auto join
-            while (SortedRankedPlayers.Where(p => p.PlayerStruct.Team == HQMTeam.NoTeam).Count() > 0)
+            while (players.Where(p => p.PlayerStruct.Team == HQMTeam.NoTeam).Count() > 0)
             {
-                foreach (RankedPlayer p in SortedRankedPlayers.Where(p => p.PlayerStruct.Team == HQMTeam.NoTeam))
+                foreach (RankedPlayer p in players.Where(p => p.PlayerStruct.Team == HQMTeam.NoTeam))
                 {
                     p.PlayerStruct.LockoutTime = 0;
                     if (p.AssignedTeam == HQMTeam.Red)
@@ -224,11 +218,15 @@ namespace HQMRanked
 
         void ClearTeams()
         {
-            RedTeam = new List<string>();
-            BlueTeam = new List<string>();
             foreach(RankedPlayer p in LoginManager.LoggedInPlayers)
             {
                 p.AssignedTeam = HQMTeam.NoTeam;
+                if (RedTeam.Contains(p.Name) || BlueTeam.Contains(p.Name))
+                {
+                    p.PlayedLastGame = true;
+                }
+                else
+                    p.PlayedLastGame = false;
             }
         }
 
