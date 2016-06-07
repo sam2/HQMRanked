@@ -38,7 +38,7 @@ namespace HQMRanked
                 {                    
                     if(GameInfo.IsGameOver)
                     {
-                        game.EndGame(true);
+                        game.EndGame(true);                        
                     }                    
                 }
                 else
@@ -46,7 +46,7 @@ namespace HQMRanked
                     if (LoginManager.LoggedInPlayers.Count >= Util.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period == 0)
                     {
                         game.StartGameTimer();
-                        Chat.SendMessage("---Required player count reached. Game will begin shortly.---");                        
+                        Chat.SendMessage("---Required player count reached. Game will start in "+Util.GAME_START_TIMER+" seconds.---");                        
                     }
                 }
                 if (LoginManager.LoggedInPlayers.Count > 0)
@@ -101,6 +101,15 @@ namespace HQMRanked
                             Chat.SendMessage("min games set to " + num);
                         }                        
                     }
+                    else if (cmd.Cmd == "gs" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+                    {
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.GAME_START_TIMER = num;
+                            Chat.SendMessage("start timer set to " + num);
+                        }
+                    }
                     else if(cmd.Cmd == "info" && (!game.InProgress || game.StartingGame))
                     {
                         WelcomeMessage();
@@ -124,8 +133,8 @@ namespace HQMRanked
 
         static void WelcomeMessage()
         {
-            Chat.SendMessage("          Waiting for players... "+LoginManager.LoggedInPlayers.Count + " / "+Util.MIN_PLAYER_COUNT);
-            Chat.SendMessage("        Type /join <password> to play");
+            Chat.SendMessage("            Waiting for players... "+LoginManager.LoggedInPlayers.Count + " / "+Util.MIN_PLAYER_COUNT);
+            Chat.SendMessage("        Type /join <yourpassword> to play");
         }
 
         

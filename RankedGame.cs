@@ -28,7 +28,7 @@ namespace HQMRanked
 
         public void StartGameTimer()
         {
-            _timer = new System.Timers.Timer(5000);
+            _timer = new System.Timers.Timer(Util.GAME_START_TIMER*1000);
             _timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
             _timer.AutoReset = false;
             _timer.Enabled = true;
@@ -60,18 +60,18 @@ namespace HQMRanked
         }
 
         public void EndGame(bool record)
-        {            
-            Chat.SendMessage("Game over. Check reddit.com/r/hqmgames for results");
+        {
+            Chat.SendMessage("Game over. Recording stats...");    
             LastGameReport = new RankedGameReport(RedTeam, BlueTeam, TrueSkillTeamModel);  
-
             if(record)
             {                          
                 RedditReporter.Instance.PostGameResult(LastGameReport);
                 SavePlayerStats(LastGameReport);
                 RedditReporter.Instance.UpdateRatings();
             }
-
-            ClearTeams();   
+            Chat.SendMessage("Stats Recorded. Check reddit.com/r/hqmgames for results");
+            ClearTeams();
+            LoginManager.LoggedInPlayers = new List<RankedPlayer>();            
             GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;

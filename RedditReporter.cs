@@ -25,7 +25,8 @@ namespace HQMRanked
             {
                 if(_Instance == null)
                 {
-                    _Instance = new RedditReporter("hqmscorebot", "hqmiseasy");
+                    string[] raw = System.IO.File.ReadAllLines("reddit.txt");
+                    _Instance = new RedditReporter(raw[0], raw[1]);
                 }
                 return _Instance;
             }
@@ -36,16 +37,19 @@ namespace HQMRanked
             Post post = Reddit.GetPost(new Uri("https://www.reddit.com/r/hqmgames/comments/4mepb1/ratings/"));
             string text = "\\# | NAME | RATING | GP | W | L | PTS | G | A \n ---------|----------|----------|----------|----------|----------|----------|----------|----------\n";                      
 
-            List<UserData> data = UserSaveData.AllUserData.Select(kvp => kvp.Value).ToList().OrderByDescending(x => x.Rating.ConservativeRating).ToList();
+            List<UserData> data = UserSaveData.AllUserData.Select(kvp => kvp.Value).Where(x=>x.GamesPlayed >= Util.LEADERBOARD_MIN_GAMES).ToList().OrderByDescending(x => x.Rating.ConservativeRating).ToList();
             int i = 1;
             foreach(UserData d in data)
+            {              
+                text += i + " | " + d.Name + " | " + Math.Round(d.Rating.ConservativeRating, 2) + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
+                i++;                    
+            }
+            data = UserSaveData.AllUserData.Select(kvp => kvp.Value).Where(x => x.GamesPlayed < Util.LEADERBOARD_MIN_GAMES && x.GamesPlayed > 0).ToList().OrderByDescending(x => x.GamesPlayed).ToList();
+            i = 0;
+            foreach (UserData d in data)
             {
-                if(d.GamesPlayed > Util.LEADERBOARD_MIN_GAMES)
-                {
-                    text += i + " | " + d.Name + " | " + Math.Round(d.Rating.ConservativeRating, 2) + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
-                    i++;
-                }
-                    
+                text += i + " | " + d.Name + " | " + "UNRANKED" + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
+                i++;
             }
             post.EditText(text);            
         }
