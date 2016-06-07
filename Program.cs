@@ -70,16 +70,16 @@ namespace HQMRanked
                         if (int.TryParse(cmd.Args[0], out num))
                         {
                             Util.TRESSPASS_REMOVER_SLEEP = num;
-                            Chat.SendMessage("trespasser remove freq set to " + num);
+                            Chat.SendMessage("TRESSPASS_REMOVER_SLEEP set to " + num);
                         }
                     }
                     else if (cmd.Cmd == "mp" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
                     {
                         int num = 0;
                         if (int.TryParse(cmd.Args[0], out num))
-                        {
-                            Chat.SendMessage("min player set");
+                        {                            
                             Util.MIN_PLAYER_COUNT = num;
+                            Chat.SendMessage("MIN_PLAYER_COUNT set to "+num);
                         }
                         
                     }
@@ -89,7 +89,7 @@ namespace HQMRanked
                         if (int.TryParse(cmd.Args[0], out num))
                         {
                             Util.MAINTHREAD_SLEEP = num;
-                            Chat.SendMessage("thread sleep set to " + num);
+                            Chat.SendMessage("MAINTHREAD_SLEEP set to " + num);
                         }
                     }
                     else if (cmd.Cmd == "mg" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
@@ -98,7 +98,7 @@ namespace HQMRanked
                         if(int.TryParse(cmd.Args[0], out num))
                         {
                             Util.LEADERBOARD_MIN_GAMES = num;
-                            Chat.SendMessage("min games set to " + num);
+                            Chat.SendMessage("LEADERBOARD_MIN_GAMES set to " + num);
                         }                        
                     }
                     else if (cmd.Cmd == "gs" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
@@ -107,7 +107,7 @@ namespace HQMRanked
                         if (int.TryParse(cmd.Args[0], out num))
                         {
                             Util.GAME_START_TIMER = num;
-                            Chat.SendMessage("start timer set to " + num);
+                            Chat.SendMessage("GAME_START_TIMER set to " + num);
                         }
                     }
                     else if(cmd.Cmd == "info" && (!game.InProgress || game.StartingGame))

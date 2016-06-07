@@ -75,8 +75,9 @@ namespace HQMRanked
             LoginManager.LoggedInPlayers = new List<RankedPlayer>();
             Chat.SendMessage("---------------------------------------------------");
             Chat.SendMessage("---All players have been logged out.---");
+            Chat.SendMessage("--Please relog to join the next game.--");
             Chat.SendMessage("---------------------------------------------------");
-            //GameInfo.IsGameOver = true;
+            GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;
         }
