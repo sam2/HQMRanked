@@ -25,7 +25,7 @@ namespace HQMRanked
             {
                 if(_Instance == null)
                 {
-                    _Instance = new RedditReporter("", "");
+                    _Instance = new RedditReporter("hqmscorebot", "hqmiseasy");
                 }
                 return _Instance;
             }
@@ -57,13 +57,14 @@ namespace HQMRanked
           
             foreach(RankedGameReport.PlayerStatLine p in report.PlayerStats)
             {
+                string statLine = "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + (p.Leaver? "LEFT GAME" : GetRatingString(report.OldRatings[p.Name], report.NewRatings[p.Name]));
                 if(p.Team == HQMEditorDedicated.HQMTeam.Red)
                 {
-                    redtext += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + GetRatingString(report.OldRatings[p.Name], report.NewRatings[p.Name]);
+                    redtext += statLine;
                 }
                 else if(p.Team == HQMEditorDedicated.HQMTeam.Blue)
                 {
-                    bluetext += "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + GetRatingString(report.OldRatings[p.Name], report.NewRatings[p.Name]);
+                    bluetext += statLine;
                 }
             }
 
@@ -71,15 +72,17 @@ namespace HQMRanked
             if (report.Winner == HQMEditorDedicated.HQMTeam.Red)
             {
                 post = "Red team wins! ";
-                post += report.RedScore + " - " + report.RedScore;
+                post += report.RedScore + " - " + report.BlueScore + (report.OT? "OT" :"");
             }
             else
             {
                 post = "Blue team wins! ";
-                post += report.BlueScore + " - " + report.RedScore;
+                post += report.BlueScore + " - " + report.RedScore + (report.OT ? "OT" : "");
             }
+            
+
             post += "\n\n";
-            post += "Match Quality: " + report.MatchQuality;
+            post += "Match Quality: " + report.MatchQuality + "\n\n";
             post += redtext + "\n\n";
             post += bluetext + "\n\n";
 

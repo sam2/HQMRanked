@@ -33,7 +33,7 @@ namespace HQMRanked
             RedScore = GameInfo.RedScore;
             BlueScore = GameInfo.BlueScore;
             Winner = RedScore > BlueScore ? HQMTeam.Red : HQMTeam.Blue;
-            OT = GameInfo.Period > 3;
+            //OT = GameInfo.Period > 3 && GameInfo.GameTime.Ticks > 0; doesnt work
 
             MatchQuality = Moserware.Skills.TrueSkillCalculator.CalculateMatchQuality(RatingCalculator.GameInfo, teamModel);
             PlayerStats = CreateStatLines(RedTeam, BlueTeam);
@@ -51,7 +51,7 @@ namespace HQMRanked
                 player.Team = RedTeam.Contains(s) ? HQMTeam.Red : HQMTeam.Blue;
 
                 RankedPlayer rp = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == s);
-                if (rp != null && rp.Name == rp.PlayerStruct.Name)
+                if (rp != null && rp.Name == rp.PlayerStruct.Name && rp.PlayerStruct.InServer)
                 {
                     player.Goals = rp.PlayerStruct.Goals;
                     player.Assists = rp.PlayerStruct.Assists;
@@ -61,7 +61,7 @@ namespace HQMRanked
                     player.Leaver = true;
                 }
 
-                PlayerStats.Add(player);
+                stats.Add(player);
             }
             return stats;
         }
