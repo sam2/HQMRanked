@@ -25,8 +25,8 @@ namespace HQMRanked
             {
                 if(_Instance == null)
                 {
-                    string[] raw = System.IO.File.ReadAllLines("reddit.txt");
-                    _Instance = new RedditReporter(raw[0], raw[1]);
+                    
+                    _Instance = new RedditReporter("hqmscorebot", "hqmisrlyhard");
                 }
                 return _Instance;
             }
@@ -61,7 +61,7 @@ namespace HQMRanked
           
             foreach(RankedGameReport.PlayerStatLine p in report.PlayerStats)
             {
-                string statLine = "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + (p.Leaver? "LEFT GAME" : GetRatingString(report.OldRatings[p.Name], report.NewRatings[p.Name]));
+                string statLine = "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + (p.Leaver? "LEFT GAME \n" : GetRatingString(report.OldRatings[p.Name], report.NewRatings[p.Name])) ;
                 if(p.Team == HQMEditorDedicated.HQMTeam.Red)
                 {
                     redtext += statLine;

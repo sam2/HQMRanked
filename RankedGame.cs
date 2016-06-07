@@ -69,10 +69,14 @@ namespace HQMRanked
                 SavePlayerStats(LastGameReport);
                 RedditReporter.Instance.UpdateRatings();
             }
+            
             Chat.SendMessage("Stats Recorded. Check reddit.com/r/hqmgames for results");
             ClearTeams();
-            LoginManager.LoggedInPlayers = new List<RankedPlayer>();            
-            GameInfo.IsGameOver = true;
+            LoginManager.LoggedInPlayers = new List<RankedPlayer>();
+            Chat.SendMessage("---------------------------------------------------");
+            Chat.SendMessage("---All players have been logged out.---");
+            Chat.SendMessage("---------------------------------------------------");
+            //GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;
         }
@@ -116,14 +120,15 @@ namespace HQMRanked
             Random r = new Random();
             while(players.Count < Math.Min(10, LoginManager.LoggedInPlayers.Count))
             {
-                RankedPlayer newPlayer = others[r.Next(others.Count)];
-                others.Remove(newPlayer);
+                RankedPlayer newPlayer = others[r.Next(others.Count)];                
                 players.Add(newPlayer);
+                others.Remove(newPlayer);
             }
 
 
-            //split up goalies
+            
             List<RankedPlayer> SortedRankedPlayers = players.OrderByDescending(x => x.UserData.Rating.ConservativeRating).ToList();
+            /*split up goalies
             List<RankedPlayer> goalies = SortedRankedPlayers.Where(x => x.PlayerStruct.Role == HQMRole.G).ToList();
             if(goalies.Count >= 2)
             {
@@ -133,7 +138,7 @@ namespace HQMRanked
                 goalies[1].AssignedTeam = HQMTeam.Blue;
                 SortedRankedPlayers.Remove(goalies[0]);
                 SortedRankedPlayers.Remove(goalies[1]);
-            }
+            }*/
             
 
             double half_max = Math.Ceiling((double)SortedRankedPlayers.Count() / 2);

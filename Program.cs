@@ -133,8 +133,10 @@ namespace HQMRanked
 
         static void WelcomeMessage()
         {
+            
             Chat.SendMessage("            Waiting for players... "+LoginManager.LoggedInPlayers.Count + " / "+Util.MIN_PLAYER_COUNT);
             Chat.SendMessage("        Type /join <yourpassword> to play");
+          
         }
 
         
