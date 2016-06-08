@@ -11,7 +11,6 @@ namespace HQMRanked
     {
         static void Main(string[] args)
         {           
-
             Console.WriteLine("Looking for server...");
             while (!MemoryEditor.Init()) { }
             Console.WriteLine("Server found.");            
@@ -33,7 +32,10 @@ namespace HQMRanked
             removeTresspassers.Start();            
             
             while(true)
-            {              
+            {
+                if (LoginManager.LoggedInPlayers.Count > 0)
+                    LoginManager.RemoveLoggedOutPlayers();
+
                 if (game.InProgress)
                 {                    
                     if(GameInfo.IsGameOver)
@@ -51,14 +53,14 @@ namespace HQMRanked
                         Chat.SendMessage("     Game will start in " + Util.GAME_START_TIMER + " seconds.");
                         Chat.SendMessage("---------------------------------------------------");
                     }
-                }
-                if (LoginManager.LoggedInPlayers.Count > 0)
-                    LoginManager.RemoveLoggedOutPlayers();
+                }                
 
                 Command cmd = cmdListener.NewCommand();
                 if (cmd != null)
                 {
                     LoginManager.HandleNewLogins(cmd);
+                    UtilCommandHandler.HandleUtilCommand(cmd);
+
                     if(cmd.Cmd == "start" && cmd.Sender.IsAdmin)
                     {
                         game.StartGame();
@@ -67,55 +69,9 @@ namespace HQMRanked
                     {
                         game.EndGame(false);
                     }
-                    else if (cmd.Cmd == "tf" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
-                    {
-                        int num = 0;
-                        if (int.TryParse(cmd.Args[0], out num))
-                        {
-                            Util.TRESSPASS_REMOVER_SLEEP = num;
-                            Chat.SendMessage("TRESSPASS_REMOVER_SLEEP set to " + num);
-                        }
-                    }
-                    else if (cmd.Cmd == "mp" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
-                    {
-                        int num = 0;
-                        if (int.TryParse(cmd.Args[0], out num))
-                        {                            
-                            Util.MIN_PLAYER_COUNT = num;
-                            Chat.SendMessage("MIN_PLAYER_COUNT set to "+num);
-                        }
-                        
-                    }
-                    else if (cmd.Cmd == "ts" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
-                    {
-                        int num = 0;
-                        if (int.TryParse(cmd.Args[0], out num))
-                        {
-                            Util.MAINTHREAD_SLEEP = num;
-                            Chat.SendMessage("MAINTHREAD_SLEEP set to " + num);
-                        }
-                    }
-                    else if (cmd.Cmd == "mg" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
-                    {
-                        int num = 0;
-                        if(int.TryParse(cmd.Args[0], out num))
-                        {
-                            Util.LEADERBOARD_MIN_GAMES = num;
-                            Chat.SendMessage("LEADERBOARD_MIN_GAMES set to " + num);
-                        }                        
-                    }
-                    else if (cmd.Cmd == "gs" && cmd.Sender.IsAdmin && cmd.Args.Length > 0)
-                    {
-                        int num = 0;
-                        if (int.TryParse(cmd.Args[0], out num))
-                        {
-                            Util.GAME_START_TIMER = num;
-                            Chat.SendMessage("GAME_START_TIMER set to " + num);
-                        }
-                    }
                     else if(cmd.Cmd == "info" && (!game.InProgress || game.StartingGame))
                     {
-                        WelcomeMessage();
+                        InfoMessage();
                     }
                     
                     Chat.FlushLastCommand();
@@ -125,12 +81,10 @@ namespace HQMRanked
             
         }
 
-        static void WelcomeMessage()
+        static void InfoMessage()
         {
-            
             Chat.SendMessage("             Logged in players: "+LoginManager.LoggedInPlayers.Count + " / "+Util.MIN_PLAYER_COUNT);
-            Chat.SendMessage("        Type /join <yourpassword> to play");
-          
+            Chat.SendMessage("        Type /join <yourpassword> to play");          
         }
 
         

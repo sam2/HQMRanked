@@ -67,6 +67,7 @@
     <Compile Include="RedditReporter.cs" />
     <Compile Include="UserSaveData.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="UtilCommandHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

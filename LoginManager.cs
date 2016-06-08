@@ -29,9 +29,10 @@ namespace HQMRanked
             }
         }
 
-        public static RankedPlayer IsLoggedIn(string name)
+        public static bool IsLoggedIn(string name, int slot)
         {
-            return LoggedInPlayers.FirstOrDefault(x => x.Name == name);
+            RankedPlayer p = LoggedInPlayers.FirstOrDefault(x => x.Name == name);
+            return (p != null && slot == p.PlayerStruct.Slot);
         }
 
         static bool Login(Player player, string password)
