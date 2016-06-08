@@ -26,10 +26,13 @@ namespace HQMRanked
             RankedGame game = new RankedGame();
             Chat.FlushLastCommand();
 
+            System.AppDomain.CurrentDomain.UnhandledException += CrashReporter;
+
             Util.MAX_PLAYERS = ServerInfo.MaxPlayerCount;
 
             Thread removeTresspassers = new Thread(game.RemoveTrespassers);
-            removeTresspassers.Start();            
+            removeTresspassers.Start();
+            
             
             while(true)
             {
@@ -53,7 +56,7 @@ namespace HQMRanked
                         Chat.SendMessage("     Game will start in " + Util.GAME_START_TIMER + " seconds.");
                         Chat.SendMessage("---------------------------------------------------");
                     }
-                }                
+                }
 
                 Command cmd = cmdListener.NewCommand();
                 if (cmd != null)
@@ -87,6 +90,10 @@ namespace HQMRanked
             Chat.SendMessage("        Type /join <yourpassword> to play");          
         }
 
-        
+        static void CrashReporter(object sender, UnhandledExceptionEventArgs args)
+        {
+            Chat.SendMessage("HQMRanked crashed.");
+            Chat.SendMessage(args.ExceptionObject.ToString());
+        }        
     }
 }
