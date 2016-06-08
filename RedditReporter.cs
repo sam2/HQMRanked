@@ -12,7 +12,8 @@ namespace HQMRanked
     class RedditReporter
     {
         Reddit Reddit;
-
+        string subreddit = "";
+        Uri ratingsPost;
         public RedditReporter(string username, string password)
         {
             Reddit = new Reddit(username, password);
@@ -25,8 +26,11 @@ namespace HQMRanked
             {
                 if(_Instance == null)
                 {
+                    string[] creds = System.IO.File.ReadAllLines("reddit.txt");
                     
-                    _Instance = new RedditReporter("hqmscorebot", "hqmisrlyhard");
+                    _Instance = new RedditReporter(creds[0], creds[1]);
+                    _Instance.subreddit = creds[2];
+                    _Instance.ratingsPost = new Uri(creds[3]);
                 }
                 return _Instance;
             }
@@ -34,7 +38,7 @@ namespace HQMRanked
 
         public void UpdateRatings()
         {
-            Post post = Reddit.GetPost(new Uri("https://www.reddit.com/r/hqmgames/comments/4mepb1/ratings/"));
+            Post post = Reddit.GetPost(ratingsPost);
             string text = "\\# | NAME | RATING | GP | W | L | PTS | G | A \n ---------|----------|----------|----------|----------|----------|----------|----------|----------\n";                      
 
             List<UserData> data = UserSaveData.AllUserData.Select(kvp => kvp.Value).Where(x=>x.GamesPlayed >= Util.LEADERBOARD_MIN_GAMES).ToList().OrderByDescending(x => x.Rating.ConservativeRating).ToList();
@@ -44,11 +48,11 @@ namespace HQMRanked
                 text += i + " | " + d.Name + " | " + Math.Round(d.Rating.ConservativeRating, 2) + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
                 i++;                    
             }
-            data = UserSaveData.AllUserData.Select(kvp => kvp.Value).Where(x => x.GamesPlayed < Util.LEADERBOARD_MIN_GAMES && x.GamesPlayed > 0).ToList().OrderByDescending(x => x.GamesPlayed).ToList();
-            i = 0;
+            data = UserSaveData.AllUserData.Select(kvp => kvp.Value).Where(x => x.GamesPlayed < Util.LEADERBOARD_MIN_GAMES && x.GamesPlayed > 1).ToList().OrderByDescending(x => x.GamesPlayed).ToList();
+
             foreach (UserData d in data)
             {
-                text += i + " | " + d.Name + " | " + "UNRANKED" + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
+                text += "-" + " | " + d.Name + " | " + "UNRANKED" + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
                 i++;
             }
             post.EditText(text);            
@@ -94,7 +98,7 @@ namespace HQMRanked
             TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
             DateTime easternTime = TimeZoneInfo.ConvertTimeFromUtc(timeUtc, easternZone);
 
-            Reddit.GetSubreddit("hqmgames").SubmitTextPost(HQMEditorDedicated.ServerInfo.Name + " - "+easternTime.ToString() + " | " + report.RedScore +" - "+report.BlueScore, post);
+            Reddit.GetSubreddit(subreddit).SubmitTextPost(HQMEditorDedicated.ServerInfo.Name + " - "+easternTime.ToString() + " | " + report.RedScore +" - "+report.BlueScore, post);
         }
 
         public string GetRatingString(Rating oldRating, Rating newRating)

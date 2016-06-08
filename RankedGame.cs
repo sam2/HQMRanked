@@ -74,8 +74,8 @@ namespace HQMRanked
             ClearTeams();
             LoginManager.LoggedInPlayers = new List<RankedPlayer>();
             Chat.SendMessage("---------------------------------------------------");
-            Chat.SendMessage("---All players have been logged out.---");
-            Chat.SendMessage("--Please relog to join the next game.--");
+            Chat.SendMessage("   All players have been logged out.");
+            Chat.SendMessage("  Please relog to join the next game.");
             Chat.SendMessage("---------------------------------------------------");
             GameInfo.IsGameOver = true;
             Tools.PauseGame();
@@ -87,26 +87,29 @@ namespace HQMRanked
         {
             while(true)
             {
-                if (!InProgress && !StartingGame) continue;
-
-                int maxPlayers = ServerInfo.MaxPlayerCount;
-                for (int i = 0; i < maxPlayers; i++)
+                if (InProgress || StartingGame)
                 {
-                    byte[] playerMemory = MemoryEditor.ReadBytes(Util.PLAYER_LIST_ADDRESS + i * Util.PLAYER_STRUCT_SIZE, Util.PLAYER_STRUCT_SIZE); //read player struct
-                    if (playerMemory[0] == 1)//in server
+                    byte[] playerList = MemoryEditor.ReadBytes(Util.PLAYER_LIST_ADDRESS, Util.MAX_PLAYERS * Util.PLAYER_STRUCT_SIZE);
+                    for (int i = 0; i < Util.MAX_PLAYERS; i++)
                     {
-                        HQMTeam t = (HQMTeam)playerMemory[Util.TEAM_OFFSET];
-
-                        IEnumerable<byte> namebytes = playerMemory.Skip(0x14).Take(0x18);
-                        string name = Encoding.ASCII.GetString(namebytes.ToArray()).Split('\0')[0]; 
-                      
-                        if (t != HQMTeam.NoTeam) //if on the ice
+                        if (playerList[i * Util.PLAYER_STRUCT_SIZE] == 1)//in server
                         {
-                            bool onRightTeam = ((t == HQMTeam.Blue && BlueTeam.Contains(name) || t == HQMTeam.Red && RedTeam.Contains(name)) && LoginManager.IsLoggedIn(name) != null);                          
-                            if(!onRightTeam) MemoryEditor.WriteInt(32, Util.PLAYER_LIST_ADDRESS + i * Util.PLAYER_STRUCT_SIZE + Util.LEG_STATE_OFFSET);                                
+                            HQMTeam t = (HQMTeam)playerList[i * Util.PLAYER_STRUCT_SIZE + Util.TEAM_OFFSET];
+
+                            IEnumerable<byte> namebytes = playerList.Skip(i * Util.PLAYER_STRUCT_SIZE + 0x14).Take(0x18);
+                            string name = Encoding.ASCII.GetString(namebytes.ToArray()).Split('\0')[0];
+
+                            if (t != HQMTeam.NoTeam && (int)t != 255) //if on the ice
+                            {
+                                bool onRightTeam = ((t == HQMTeam.Blue && BlueTeam.Contains(name) || t == HQMTeam.Red && RedTeam.Contains(name)) && LoginManager.IsLoggedIn(name) != null);
+                                if (!onRightTeam)
+                                {
+                                    MemoryEditor.WriteInt(32, Util.PLAYER_LIST_ADDRESS + i * Util.PLAYER_STRUCT_SIZE + Util.LEG_STATE_OFFSET);
+                                }                                    
+                            }
                         }
                     }
-                }
+                }                
                 Thread.Sleep(Util.TRESSPASS_REMOVER_SLEEP);
             }            
         }

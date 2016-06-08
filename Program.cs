@@ -14,9 +14,7 @@ namespace HQMRanked
 
             Console.WriteLine("Looking for server...");
             while (!MemoryEditor.Init()) { }
-            Console.WriteLine("Server found.");
-
-            Util.MAX_PLAYERS = ServerInfo.MaxPlayerCount;
+            Console.WriteLine("Server found.");            
 
             CommandListener cmdListener = new CommandListener(Chat.MessageCount);
             Chat.RecordCommandSource();
@@ -28,6 +26,8 @@ namespace HQMRanked
             Tools.PauseGame();
             RankedGame game = new RankedGame();
             Chat.FlushLastCommand();
+
+            Util.MAX_PLAYERS = ServerInfo.MaxPlayerCount;
 
             Thread removeTresspassers = new Thread(game.RemoveTrespassers);
             removeTresspassers.Start();            
@@ -46,7 +46,10 @@ namespace HQMRanked
                     if (LoginManager.LoggedInPlayers.Count >= Util.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period == 0)
                     {
                         game.StartGameTimer();
-                        Chat.SendMessage("---Required player count reached. Game will start in "+Util.GAME_START_TIMER+" seconds.---");                        
+                        Chat.SendMessage("---------------------------------------------------");
+                        Chat.SendMessage("     Required player count reached.");
+                        Chat.SendMessage("     Game will start in " + Util.GAME_START_TIMER + " seconds.");
+                        Chat.SendMessage("---------------------------------------------------");
                     }
                 }
                 if (LoginManager.LoggedInPlayers.Count > 0)
@@ -114,16 +117,7 @@ namespace HQMRanked
                     {
                         WelcomeMessage();
                     }
-                    else if(cmd.Cmd == "logout")
-                    {
-                        RankedPlayer p = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == cmd.Sender.Name);
-                        if(p!=null)
-                        {
-                            LoginManager.LoggedInPlayers.Remove(p);
-                            Chat.SendMessage(p.Name + " logged out.");
-                        }
-                            
-                    }
+                    
                     Chat.FlushLastCommand();
                 }
                 Thread.Sleep(Util.MAINTHREAD_SLEEP);
@@ -134,7 +128,7 @@ namespace HQMRanked
         static void WelcomeMessage()
         {
             
-            Chat.SendMessage("            Waiting for players... "+LoginManager.LoggedInPlayers.Count + " / "+Util.MIN_PLAYER_COUNT);
+            Chat.SendMessage("             Logged in players: "+LoginManager.LoggedInPlayers.Count + " / "+Util.MIN_PLAYER_COUNT);
             Chat.SendMessage("        Type /join <yourpassword> to play");
           
         }
