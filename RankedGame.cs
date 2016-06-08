@@ -11,11 +11,8 @@ namespace HQMRanked
     {
         public bool InProgress = false;
 
-        public bool StartingGame
-        {
-            get;
-            private set;
-        }
+        public bool StartingGame = false;
+        
 
         List<string> RedTeam = new List<string>();
         List<string> BlueTeam = new List<string>();
