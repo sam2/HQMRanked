@@ -101,7 +101,7 @@ namespace HQMRanked
 
                             if (t != HQMTeam.NoTeam && (int)t != 255) //if on the ice
                             {
-                                bool onRightTeam = (((t == HQMTeam.Blue && BlueTeam.Contains(name)) || (t == HQMTeam.Red && RedTeam.Contains(name))) && LoginManager.IsLoggedIn(name, i);
+                                bool onRightTeam = (((t == HQMTeam.Blue && BlueTeam.Contains(name)) || (t == HQMTeam.Red && RedTeam.Contains(name))) && LoginManager.IsLoggedIn(name, i));
                                 if (!onRightTeam)
                                 {
                                     MemoryEditor.WriteInt(32, Util.PLAYER_LIST_ADDRESS + i * Util.PLAYER_STRUCT_SIZE + Util.LEG_STATE_OFFSET);
