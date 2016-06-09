@@ -16,14 +16,14 @@ namespace HQMRanked
             if (cmd.Cmd == "join" && cmd.Args.Length > 0)
             {
                 RemoveLoggedOutPlayers();
-                if (LoginManager.Login(cmd.Sender, cmd.Args[0]))
+                if (Login(cmd.Sender, cmd.Args[0]))
                 {
                     return;
                 }
                 else
                 {
-                    LoginManager.CreateNewUser(cmd.Sender.Name, cmd.Args[0]);
-                    LoginManager.Login(cmd.Sender, cmd.Args[0]);
+                    CreateNewUser(cmd.Sender.Name, cmd.Args[0]);
+                    Login(cmd.Sender, cmd.Args[0]);
                     UserSaveData.SaveUserData();
                 }
             }
@@ -43,21 +43,21 @@ namespace HQMRanked
                 RankedPlayer rankedPlayer = new RankedPlayer(player.Name, player.IPAddress, player, u);
                 if(LoggedInPlayers.FirstOrDefault(x=> x.Name == player.Name) != null)
                 {
-                    Chat.SendMessage(u.Name + " is already logged in.");
+                    Chat.SendMessage(">>"+u.Name + " is already logged in.");
                 }
                 else if(LoggedInPlayers.FirstOrDefault(x=> x.IP.SequenceEqual(player.IPAddress)) != null && !player.IsAdmin)
                 {
                     string name = LoggedInPlayers.FirstOrDefault(x => x.IP.SequenceEqual(player.IPAddress)).Name;
-                    Chat.SendMessage("Failed to log in "+u.Name+", "+name +" is already logged in from that IP.");
+                    Chat.SendMessage(">>Failed to log in "+u.Name+", "+name +" is already logged in from that IP.");
                 }
                 else if(u.Password == password)
                 {
-                    Chat.SendMessage(u.Name + " is now logged in.");
+                    Chat.SendMessage(">>"+u.Name+" is now logged in.");
                     LoggedInPlayers.Add(rankedPlayer);                    
                 } 
                 else
                 {
-                    Chat.SendMessage(u.Name + " - wrong password.");
+                    Chat.SendMessage(">>"+u.Name + " - wrong password.");
                 }                
                 return true;
             }
@@ -68,18 +68,18 @@ namespace HQMRanked
         {
             if(password == "")
             {
-                Chat.SendMessage("invalid password");
+                Chat.SendMessage(">>Invalid password");
                 return false;
             }
             UserData u;
             if (UserSaveData.AllUserData.TryGetValue(name, out u))
             {
-                Console.WriteLine("User " + u.Name + " already exists.");
+                Console.WriteLine(">>User " + u.Name + " already exists.");
                 return false;
             }
             u = new UserData(name, password, Moserware.Skills.GameInfo.DefaultGameInfo.DefaultRating);
             UserSaveData.AllUserData[u.Name] = u;
-            Chat.SendMessage("New user " + name + " has been created.");
+            Chat.SendMessage(">>New user " + name + " has been created.");
             return true;
         }       
 

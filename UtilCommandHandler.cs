@@ -58,6 +58,23 @@ namespace HQMRanked
                         Chat.SendMessage("GAME_START_TIMER set to " + num);
                     }
                 }
+                else if (cmd.Cmd == "changepw" && cmd.Args.Length > 1)
+                {
+                    UserData u;
+                    if(UserSaveData.AllUserData.TryGetValue(cmd.Args[0], out u))
+                    {
+                        u.Password = cmd.Args[1];
+                        Chat.SendMessage(cmd.Args[0] + " password changed");
+                    }
+                }
+                else if (cmd.Cmd == "resetaccount")
+                {
+                    if (UserSaveData.AllUserData.ContainsKey(cmd.Args[0]) && !LoginManager.LoggedInPlayers.Any(x=>x.Name == cmd.Args[0]))
+                    {
+                        UserSaveData.AllUserData.Remove(cmd.Args[0]);
+                        Chat.SendMessage(cmd.Args[0] + " userdata deleted.");
+                    }
+                }
             }
             
         }
