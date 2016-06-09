@@ -74,13 +74,14 @@ namespace HQMRanked
             Chat.SendMessage("   All players have been logged out.");
             Chat.SendMessage("  Please relog to join the next game.");
             Chat.SendMessage("---------------------------------------------------");
+            GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;
         }
 
 
         public void RemoveTrespassers()
-        {
+        {           
             while(true)
             {
                 if (InProgress || StartingGame)
@@ -100,23 +101,39 @@ namespace HQMRanked
                                 bool onRightTeam = (((t == HQMTeam.Blue && BlueTeam.Contains(name)) || (t == HQMTeam.Red && RedTeam.Contains(name))) && LoginManager.IsLoggedIn(name, i));
                                 if (!onRightTeam)
                                 {
-                                    MemoryEditor.WriteInt(32, Util.PLAYER_LIST_ADDRESS + i * Util.PLAYER_STRUCT_SIZE + Util.LEG_STATE_OFFSET);
+                                    int team = (int)t;
+                                    while (team != 255)
+                                    {
+                                        MemoryEditor.WriteInt(32, Util.PLAYER_LIST_ADDRESS + i * Util.PLAYER_STRUCT_SIZE + Util.LEG_STATE_OFFSET);
+                                        team = MemoryEditor.ReadBytes(Util.PLAYER_LIST_ADDRESS + i * Util.PLAYER_STRUCT_SIZE + Util.TEAM_OFFSET, 1)[0];
+                                    }
+                                        
                                 }                                    
                             }
                         }
                     }
                 }                
                 Thread.Sleep(Util.TRESSPASS_REMOVER_SLEEP);
-            }            
+            }           
         }
+
+
 
 
 
         public void CreateTeams()
         {
             //give prio to people who didn't play last game
-            List<RankedPlayer> players = LoginManager.LoggedInPlayers.Where(x => !x.PlayedLastGame).ToList();
-            List<RankedPlayer> others = LoginManager.LoggedInPlayers.Except(players).ToList();
+            List<RankedPlayer> players = new List<RankedPlayer>();
+            List<RankedPlayer> others = new List<RankedPlayer>();
+            foreach(RankedPlayer p in LoginManager.LoggedInPlayers)
+            {
+                if (p.PlayedLastGame)
+                    others.Add(p);
+                else
+                    players.Add(p);
+            }
+
             Random r = new Random();
             while(players.Count < Math.Min(10, LoginManager.LoggedInPlayers.Count))
             {
