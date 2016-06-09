@@ -28,8 +28,6 @@ namespace HQMRanked
 
             System.AppDomain.CurrentDomain.UnhandledException += CrashReporter;
 
-            Util.MAX_PLAYERS = ServerInfo.MaxPlayerCount;
-
             Thread removeTresspassers = new Thread(game.RemoveTrespassers);
             removeTresspassers.Start();
             

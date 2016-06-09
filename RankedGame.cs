@@ -74,7 +74,6 @@ namespace HQMRanked
             Chat.SendMessage("   All players have been logged out.");
             Chat.SendMessage("  Please relog to join the next game.");
             Chat.SendMessage("---------------------------------------------------");
-            GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;
         }
@@ -121,9 +120,9 @@ namespace HQMRanked
             Random r = new Random();
             while(players.Count < Math.Min(10, LoginManager.LoggedInPlayers.Count))
             {
-                RankedPlayer newPlayer = others[r.Next(others.Count)];                
-                players.Add(newPlayer);
+                RankedPlayer newPlayer = others[r.Next(others.Count)];
                 others.Remove(newPlayer);
+                players.Add(newPlayer);                
             }
 
 
