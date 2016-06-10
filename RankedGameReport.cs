@@ -92,14 +92,6 @@ namespace HQMRanked
             else
                 return Moserware.Skills.TrueSkillCalculator.CalculateNewRatings(Moserware.Skills.GameInfo.DefaultGameInfo, teamModel, 2, 1);
         }
-
-        public void ReportMVP()
-        {
-            Chat.SendMessage("***************************************************");
-            Chat.SendMessage("MVP: " + MVP.Name + " " + MVP.Goals + "G, " + MVP.Assists + "A");
-            Chat.SendMessage("***************************************************");
-        }
-
     }
 
     

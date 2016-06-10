@@ -62,7 +62,6 @@ namespace HQMRanked
         {
             Chat.SendMessage("Game over. Recording stats...");    
             LastGameReport = new RankedGameReport(RedTeam, BlueTeam, TrueSkillTeamModel);
-            LastGameReport.ReportMVP();
             if(record)
             {                          
                 RedditReporter.Instance.PostGameResult(LastGameReport);

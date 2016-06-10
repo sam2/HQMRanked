@@ -47,7 +47,7 @@ namespace HQMRanked
                     {
                         game.IsMercy = true;
                         Chat.SendMessage("---------------------------------------------------");
-                        Chat.SendMessage("     Game is ending due to mercy rule.");
+                        Chat.SendMessage("  Game is ending due to mercy rule.");
                         Chat.SendMessage("---------------------------------------------------");
                         GameInfo.Period = 3;
                         GameInfo.GameTime = new TimeSpan(0, 0, 0, 1);
