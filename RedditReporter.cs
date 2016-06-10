@@ -80,12 +80,12 @@ namespace HQMRanked
             if (report.Winner == HQMEditorDedicated.HQMTeam.Red)
             {
                 post = "Red team wins! ";
-                post += report.RedScore + " - " + report.BlueScore + (report.OT? "OT" :"");
+                post += report.RedScore + " - " + report.BlueScore;
             }
             else
             {
                 post = "Blue team wins! ";
-                post += report.BlueScore + " - " + report.RedScore + (report.OT ? "OT" : "");
+                post += report.BlueScore + " - " + report.RedScore;
             }
             
 

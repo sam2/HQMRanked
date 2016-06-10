@@ -42,7 +42,16 @@ namespace HQMRanked
                     if(GameInfo.IsGameOver)
                     {
                         game.EndGame(true);                        
-                    }                    
+                    }         
+                    if(CheckMercy() && !game.IsMercy)
+                    {
+                        game.IsMercy = true;
+                        Chat.SendMessage("---------------------------------------------------");
+                        Chat.SendMessage("     Game is ending due to mercy rule.");
+                        Chat.SendMessage("---------------------------------------------------");
+                        GameInfo.Period = 3;
+                        GameInfo.GameTime = new TimeSpan(0, 0, 0, 1);
+                    }
                 }
                 else
                 {                    
@@ -73,8 +82,7 @@ namespace HQMRanked
                     else if(cmd.Cmd == "info" && (!game.InProgress || game.StartingGame))
                     {
                         InfoMessage();
-                    }
-                    
+                    }               
                     Chat.FlushLastCommand();
                 }
                 Thread.Sleep(Util.MAINTHREAD_SLEEP);
@@ -92,6 +100,16 @@ namespace HQMRanked
         {
             Chat.SendMessage("HQMRanked crashed.");
             Chat.SendMessage(args.ExceptionObject.ToString());
-        }        
+        }
+
+        public static bool CheckMercy()
+        {
+            byte[] score = MemoryEditor.ReadBytes(0x018931F8, 8);
+            int redScore = score[0];
+            int blueScore = score[4];
+            return (Math.Abs(redScore - blueScore) >= Util.MERCY_RULE_DIFF);
+        }
+
+        
     }
 }

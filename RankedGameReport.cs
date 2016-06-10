@@ -22,7 +22,7 @@ namespace HQMRanked
         public int RedScore;
         public int BlueScore;
         public HQMTeam Winner;
-        public bool OT;
+        public PlayerStatLine MVP;
         public double MatchQuality;
         public IDictionary<string, Moserware.Skills.Rating> OldRatings;
         public IDictionary<string, Moserware.Skills.Rating> NewRatings;
@@ -33,12 +33,20 @@ namespace HQMRanked
             RedScore = GameInfo.RedScore;
             BlueScore = GameInfo.BlueScore;
             Winner = RedScore > BlueScore ? HQMTeam.Red : HQMTeam.Blue;
-            //OT = GameInfo.Period > 3 && GameInfo.GameTime.Ticks > 0; doesnt work
 
             MatchQuality = Moserware.Skills.TrueSkillCalculator.CalculateMatchQuality(RatingCalculator.GameInfo, teamModel);
             PlayerStats = CreateStatLines(RedTeam, BlueTeam);
             OldRatings = GetOldRatings(RedTeam.Concat(BlueTeam));
-            NewRatings = GetNewRatings(teamModel);                   
+            NewRatings = GetNewRatings(teamModel);
+
+            MVP = PlayerStats[0];
+            foreach(PlayerStatLine p in PlayerStats)
+            {
+                if(p.Goals + p.Assists > MVP.Goals + MVP.Assists)
+                {
+                    MVP = p;
+                }
+            }
         }
 
         private List<PlayerStatLine> CreateStatLines(List<string> RedTeam, List<String> BlueTeam)
@@ -79,12 +87,17 @@ namespace HQMRanked
 
         private IDictionary<string, Moserware.Skills.Rating> GetNewRatings(IEnumerable<IDictionary<string, Moserware.Skills.Rating>> teamModel)
         {
-            if(OT)
-                return Moserware.Skills.TrueSkillCalculator.CalculateNewRatings(Moserware.Skills.GameInfo.DefaultGameInfo, teamModel, 1, 1);
-            else if(Winner == HQMTeam.Red)
+            if(Winner == HQMTeam.Red)
                 return Moserware.Skills.TrueSkillCalculator.CalculateNewRatings(Moserware.Skills.GameInfo.DefaultGameInfo, teamModel, 1, 2);
             else
                 return Moserware.Skills.TrueSkillCalculator.CalculateNewRatings(Moserware.Skills.GameInfo.DefaultGameInfo, teamModel, 2, 1);
+        }
+
+        public void ReportMVP()
+        {
+            Chat.SendMessage("***************************************************");
+            Chat.SendMessage("MVP: " + MVP.Name + " " + MVP.Goals + "G, " + MVP.Assists + "A");
+            Chat.SendMessage("***************************************************");
         }
 
     }

@@ -12,7 +12,8 @@ namespace HQMRanked
         public bool InProgress = false;
 
         public bool StartingGame = false;
-        
+
+        public bool IsMercy = false;
 
         List<string> RedTeam = new List<string>();
         List<string> BlueTeam = new List<string>();
@@ -48,6 +49,7 @@ namespace HQMRanked
 
         public void StartGame()
         {
+            IsMercy = false;
             SetPlayedLastGame();
             CreateTeams();
             TrueSkillTeamModel = RatingCalculator.BuildTeamModel(RedTeam, BlueTeam);
@@ -59,7 +61,8 @@ namespace HQMRanked
         public void EndGame(bool record)
         {
             Chat.SendMessage("Game over. Recording stats...");    
-            LastGameReport = new RankedGameReport(RedTeam, BlueTeam, TrueSkillTeamModel);  
+            LastGameReport = new RankedGameReport(RedTeam, BlueTeam, TrueSkillTeamModel);
+            LastGameReport.ReportMVP();
             if(record)
             {                          
                 RedditReporter.Instance.PostGameResult(LastGameReport);
@@ -77,8 +80,7 @@ namespace HQMRanked
             GameInfo.IsGameOver = true;
             Tools.PauseGame();
             InProgress = false;
-        }
-
+        }      
 
         public void RemoveTrespassers()
         {           

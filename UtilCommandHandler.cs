@@ -75,6 +75,15 @@ namespace HQMRanked
                         Chat.SendMessage(cmd.Args[0] + " userdata deleted.");
                     }
                 }
+                else if (cmd.Cmd == "mr")
+                {
+                    int num = 0;
+                    if (int.TryParse(cmd.Args[0], out num))
+                    {
+                        Util.MERCY_RULE_DIFF = num;
+                        Chat.SendMessage("MERCY_RULE_DIFF set to " + num);
+                    }
+                }
             }
             
         }
