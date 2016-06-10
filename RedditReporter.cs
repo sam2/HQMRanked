@@ -90,7 +90,8 @@ namespace HQMRanked
             
 
             post += "\n\n";
-            post += "Match Quality: " + report.MatchQuality + "\n\n";
+            post += "MVP: " + report.MVP.Name + "\n\n";
+            post += "Match Quality: " + Math.Round(report.MatchQuality,3) + "\n\n";
             post += redtext + "\n\n";
             post += bluetext + "\n\n";
 
