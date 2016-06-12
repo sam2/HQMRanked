@@ -63,13 +63,30 @@ namespace HQMRanked
             Chat.SendMessage("Game over. Recording stats...");    
             LastGameReport = new RankedGameReport(RedTeam, BlueTeam, TrueSkillTeamModel);
             if(record)
-            {                          
-                RedditReporter.Instance.PostGameResult(LastGameReport);
+            {              
+                try
+                {
+                    RedditReporter.Instance.PostGameResult(LastGameReport);
+                }   
+                catch(Exception ex)
+                {
+                    Chat.SendMessage("Could not post game result: " + ex.Message);
+                }
+                         
+                
                 SavePlayerStats(LastGameReport);
-                RedditReporter.Instance.UpdateRatings();
-            }
+                try
+                {
+                    RedditReporter.Instance.UpdateRatings();
+                    Chat.SendMessage("Stats Recorded. Check reddit.com/r/hqmgames for results");
+                }
+                catch (Exception ex)
+                {
+                    Chat.SendMessage("Could not update ratings post: " + ex.Message);
+                }
+                
+            }           
             
-            Chat.SendMessage("Stats Recorded. Check reddit.com/r/hqmgames for results");
             ClearTeams();
             LoginManager.LoggedInPlayers = new List<RankedPlayer>();
             Chat.SendMessage("---------------------------------------------------");
