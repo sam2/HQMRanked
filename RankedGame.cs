@@ -148,9 +148,11 @@ namespace HQMRanked
             {
                 if (p.PlayedLastGame)
                     others.Add(p);
-                else
+                else if(players.Count < 10)
                     players.Add(p);
             }
+
+          
 
             Random r = new Random();
             while(players.Count < Math.Min(10, LoginManager.LoggedInPlayers.Count))
