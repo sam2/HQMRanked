@@ -11,81 +11,89 @@ namespace HQMRanked
     {
         public static void HandleUtilCommand(Command cmd)
         {
-            if(cmd.Sender.IsAdmin && cmd.Args.Length > 0)
+            if(cmd.Sender.IsAdmin)
             {
-                if (cmd.Cmd == "tf")
+                if (cmd.Cmd == "postratings")
                 {
-                    int num = 0;
-                    if (int.TryParse(cmd.Args[0], out num))
-                    {
-                        Util.TRESSPASS_REMOVER_SLEEP = num;
-                        Chat.SendMessage("TRESSPASS_REMOVER_SLEEP set to " + num);
-                    }
+                    Chat.SendMessage("Updating rankings...");
+                    RedditReporter.Instance.UpdateRatings();
+                    Chat.SendMessage("Rankings updated.");
                 }
-                else if (cmd.Cmd == "mp")
+                if (cmd.Args.Length > 0)
                 {
-                    int num = 0;
-                    if (int.TryParse(cmd.Args[0], out num))
+                    if (cmd.Cmd == "tf")
                     {
-                        Util.MIN_PLAYER_COUNT = num;
-                        Chat.SendMessage("MIN_PLAYER_COUNT set to " + num);
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.TRESSPASS_REMOVER_SLEEP = num;
+                            Chat.SendMessage("TRESSPASS_REMOVER_SLEEP set to " + num);
+                        }
                     }
-                }
-                else if (cmd.Cmd == "ts")
-                {
-                    int num = 0;
-                    if (int.TryParse(cmd.Args[0], out num))
+                    else if (cmd.Cmd == "mp")
                     {
-                        Util.MAINTHREAD_SLEEP = num;
-                        Chat.SendMessage("MAINTHREAD_SLEEP set to " + num);
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.MIN_PLAYER_COUNT = num;
+                            Chat.SendMessage("MIN_PLAYER_COUNT set to " + num);
+                        }
                     }
-                }
-                else if (cmd.Cmd == "mg")
-                {
-                    int num = 0;
-                    if (int.TryParse(cmd.Args[0], out num))
+                    else if (cmd.Cmd == "ts")
                     {
-                        Util.LEADERBOARD_MIN_GAMES = num;
-                        Chat.SendMessage("LEADERBOARD_MIN_GAMES set to " + num);
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.MAINTHREAD_SLEEP = num;
+                            Chat.SendMessage("MAINTHREAD_SLEEP set to " + num);
+                        }
                     }
-                }
-                else if (cmd.Cmd == "gs")
-                {
-                    int num = 0;
-                    if (int.TryParse(cmd.Args[0], out num))
+                    else if (cmd.Cmd == "mg")
                     {
-                        Util.GAME_START_TIMER = num;
-                        Chat.SendMessage("GAME_START_TIMER set to " + num);
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.LEADERBOARD_MIN_GAMES = num;
+                            Chat.SendMessage("LEADERBOARD_MIN_GAMES set to " + num);
+                        }
                     }
-                }
-                else if (cmd.Cmd == "changepw" && cmd.Args.Length > 1)
-                {
-                    UserData u;
-                    if(UserSaveData.AllUserData.TryGetValue(cmd.Args[0], out u))
+                    else if (cmd.Cmd == "gs")
                     {
-                        u.Password = cmd.Args[1];
-                        Chat.SendMessage(cmd.Args[0] + " password changed");
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.GAME_START_TIMER = num;
+                            Chat.SendMessage("GAME_START_TIMER set to " + num);
+                        }
                     }
-                }
-                else if (cmd.Cmd == "resetaccount")
-                {
-                    if (UserSaveData.AllUserData.ContainsKey(cmd.Args[0]) && !LoginManager.LoggedInPlayers.Any(x=>x.Name == cmd.Args[0]))
+                    else if (cmd.Cmd == "changepw" && cmd.Args.Length > 1)
                     {
-                        UserSaveData.AllUserData.Remove(cmd.Args[0]);
-                        Chat.SendMessage(cmd.Args[0] + " userdata deleted.");
+                        UserData u;
+                        if (UserSaveData.AllUserData.TryGetValue(cmd.Args[0], out u))
+                        {
+                            u.Password = cmd.Args[1];
+                            Chat.SendMessage(cmd.Args[0] + " password changed");
+                        }
                     }
-                }
-                else if (cmd.Cmd == "mr")
-                {
-                    int num = 0;
-                    if (int.TryParse(cmd.Args[0], out num))
+                    else if (cmd.Cmd == "resetaccount")
                     {
-                        Util.MERCY_RULE_DIFF = num;
-                        Chat.SendMessage("MERCY_RULE_DIFF set to " + num);
+                        if (UserSaveData.AllUserData.ContainsKey(cmd.Args[0]) && !LoginManager.LoggedInPlayers.Any(x => x.Name == cmd.Args[0]))
+                        {
+                            UserSaveData.AllUserData.Remove(cmd.Args[0]);
+                            Chat.SendMessage(cmd.Args[0] + " userdata deleted.");
+                        }
                     }
-                }
+                    else if (cmd.Cmd == "mr")
+                    {
+                        int num = 0;
+                        if (int.TryParse(cmd.Args[0], out num))
+                        {
+                            Util.MERCY_RULE_DIFF = num;
+                            Chat.SendMessage("MERCY_RULE_DIFF set to " + num);
+                        }
+                    }
+                }              
             }
-            
         }
     }
 }
