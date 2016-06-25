@@ -22,7 +22,6 @@ namespace HQMRanked
             UserSaveData.AllUserData = UserSaveData.ReadUserData();
             Console.WriteLine("done.");
 
-            Tools.PauseGame();
             RankedGame game = new RankedGame();
             Chat.FlushLastCommand();
 
@@ -55,9 +54,10 @@ namespace HQMRanked
                 }
                 else
                 {                    
-                    if (LoginManager.LoggedInPlayers.Count >= Util.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period == 0)
+                    if (LoginManager.LoggedInPlayers.Count >= Util.MIN_PLAYER_COUNT && !game.StartingGame && GameInfo.Period < 4)
                     {
                         game.StartGameTimer();
+                        Thread.Sleep(Util.MAINTHREAD_SLEEP);
                         Chat.SendMessage("---------------------------------------------------");
                         Chat.SendMessage("     Required player count reached.");
                         Chat.SendMessage("     Game will start in " + Util.GAME_START_TIMER + " seconds.");
