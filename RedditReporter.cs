@@ -41,11 +41,11 @@ namespace HQMRanked
             Post post = Reddit.GetPost(ratingsPost);
             string text = "\\# | NAME | RATING | GP | W | L | PTS | G | A \n ---------|----------|----------|----------|----------|----------|----------|----------|----------\n";                      
 
-            List<UserData> data = UserSaveData.AllUserData.Select(kvp => kvp.Value).Where(x=>x.GamesPlayed >= Util.LEADERBOARD_MIN_GAMES).ToList().OrderByDescending(x => x.Rating.ConservativeRating).ToList();
+            List<UserData> data = UserSaveData.AllUserData.Select(kvp => kvp.Value).Where(x=>x.GamesPlayed >= Util.LEADERBOARD_MIN_GAMES).ToList().OrderByDescending(x => x.Rating.Mean).ToList();
             int i = 1;
             foreach(UserData d in data)
             {              
-                text += i + " | " + d.Name + " | " + Math.Round(d.Rating.ConservativeRating, 2) + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
+                text += i + " | " + d.Name + " | " + Math.Round(d.Rating.Mean, 2)*100 + " | " + d.GamesPlayed + " | " + d.Wins + " | " + (d.GamesPlayed - d.Wins) + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
                 i++;                    
             }
             data = UserSaveData.AllUserData.Select(kvp => kvp.Value).Where(x => x.GamesPlayed < Util.LEADERBOARD_MIN_GAMES && x.GamesPlayed > 1).ToList().OrderByDescending(x => x.GamesPlayed).ToList();
@@ -60,12 +60,13 @@ namespace HQMRanked
 
         public void PostGameResult(RankedGameReport report)
         {
-            string redtext =  "| RED  | G | A | OLD RATING | NEW RATING \n ----------|----------|----------|----------|----------\n";
-            string bluetext = "| BLUE | G | A | OLD RATING | NEW RATING \n ----------|----------|----------|----------|----------\n";
+            string redtext =  "| RED  | G | A | CHANGE | NEW RATING  \n ----------|----------|----------|----------|----------\n";
+            string bluetext = "| BLUE | G | A | CHANGE | NEW RATING  \n ----------|----------|----------|----------|----------\n";
           
             foreach(RankedGameReport.PlayerStatLine p in report.PlayerStats)
             {
-                string statLine = "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + (p.Leaver? "LEFT GAME \n" : GetRatingString(report.OldRatings[p.Name], report.NewRatings[p.Name])) ;
+                RankedPlayer rp = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == p.Name);
+                string statLine = "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + (rp.UserData.GamesPlayed < Util.LEADERBOARD_MIN_GAMES ? "PLACEMENT \n" : GetRatingString(report.OldRatings[p.Name], report.NewRatings[p.Name])) ;
                 if(p.Team == HQMEditorDedicated.HQMTeam.Red)
                 {
                     redtext += statLine;
@@ -104,7 +105,10 @@ namespace HQMRanked
 
         public string GetRatingString(Rating oldRating, Rating newRating)
         {
-            return "**"+Math.Round(oldRating.ConservativeRating, 2)+ "**" + " (*" + oldRating.ToString() + "*)" + " | " + "**" + Math.Round(newRating.ConservativeRating, 2)+"**"+" (*" + newRating.ToString() + "*)" + '\n';
+            double change = (Math.Round(newRating.Mean, 2) - Math.Round(oldRating.Mean, 2)) * 100;
+            double result = Math.Round(newRating.Mean, 2) * 100;
+            string sign = change >= 0 ? "+" : "";
+            return sign + (int)change + " | " + result + '\n';
         }
     }
 }
