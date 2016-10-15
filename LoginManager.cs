@@ -20,6 +20,11 @@ namespace HQMRanked
                 {
                     return;
                 }
+                else if(Util.NEW_ACCOUNTS_DISABLED)
+                {
+                    Chat.SendMessage(cmd.Sender.Name + " - Creating new accounts is disabled.");
+                    Chat.SendMessage("Check the /r/hqmgames for details.");
+                }
                 else
                 {
                     CreateNewUser(cmd.Sender.Name, cmd.Args[0]);

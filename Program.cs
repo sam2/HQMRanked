@@ -11,6 +11,7 @@ namespace HQMRanked
     {
         static void Main(string[] args)
         {           
+
             Console.WriteLine("Looking for server...");
             while (!MemoryEditor.Init()) { }
             Console.WriteLine("Server found.");            
@@ -25,7 +26,7 @@ namespace HQMRanked
             RankedGame game = new RankedGame();
             Chat.FlushLastCommand();
 
-            System.AppDomain.CurrentDomain.UnhandledException += CrashReporter;
+            AppDomain.CurrentDomain.UnhandledException += CrashReporter;
 
             Thread removeTresspassers = new Thread(game.RemoveTrespassers);
             removeTresspassers.Start();

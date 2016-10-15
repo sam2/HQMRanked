@@ -39,7 +39,7 @@ namespace HQMRanked
         {
             if (LoginManager.LoggedInPlayers.Count < Util.MIN_PLAYER_COUNT)
             {
-                Chat.SendMessage("Not enough players. Aborting game...");
+                Chat.SendMessage("Not enough players. Aborting game.");
             }
             else
             {
@@ -55,7 +55,7 @@ namespace HQMRanked
             SetPlayedLastGame();
             CreateTeams();
             TrueSkillTeamModel = RatingCalculator.BuildTeamModel(RedTeam, BlueTeam);
-            Chat.SendMessage("Game Starting with match quality " + Math.Round(RatingCalculator.CalculateMatchQuality(TrueSkillTeamModel), 2));            
+            Chat.SendMessage("---- Game Starting ----");            
             Tools.ResumeGame();
             InProgress = true;
         }
@@ -76,10 +76,12 @@ namespace HQMRanked
                 }
                          
                 
-                SavePlayerStats(LastGameReport);
+                ApplyGameStats(LastGameReport);
+                DivisionManager.AssignDivisions();
+                UserSaveData.SaveUserData();
                 try
                 {
-                    RedditReporter.Instance.UpdateRatings();
+                    RedditReporter.Instance.PostLeagues();
                     Chat.SendMessage("Stats Recorded. Check reddit.com/r/hqmgames for results");
                 }
                 catch (Exception ex)
@@ -251,7 +253,7 @@ namespace HQMRanked
             Chat.SendMessage(blue);
         }
 
-        private void SavePlayerStats(RankedGameReport report)
+        private void ApplyGameStats(RankedGameReport report)
         {
             foreach(RankedGameReport.PlayerStatLine statline in report.PlayerStats)
             {
@@ -267,8 +269,7 @@ namespace HQMRanked
                     }
                     u.Rating = report.NewRatings[statline.Name];
                 }
-            }
-            UserSaveData.SaveUserData();
+            }            
         }
 
         private void SetPlayedLastGame()

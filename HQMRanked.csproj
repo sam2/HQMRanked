@@ -63,6 +63,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RankedGame.cs" />
     <Compile Include="RankedGameReport.cs" />
+    <Compile Include="DivisionManager.cs" />
     <Compile Include="RatingCalculator.cs" />
     <Compile Include="RedditReporter.cs" />
     <Compile Include="UserSaveData.cs" />

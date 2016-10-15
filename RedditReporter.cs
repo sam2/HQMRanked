@@ -14,7 +14,7 @@ namespace HQMRanked
         Reddit Reddit;
         string subreddit = "";
         Uri ratingsPost;
-        public RedditReporter(string username, string password)
+        private RedditReporter(string username, string password)
         {
             Reddit = new Reddit(username, password);
         }
@@ -58,10 +58,34 @@ namespace HQMRanked
             post.EditText(text);            
         }
 
+        public void PostLeagues()
+        {
+            string[] leagueNames = { "**PUBSTAR**", "**ALLSTAR**", "**PRO**", "**ROOKIE**", "**JUNIOR**", "**PROSPECT**" };
+            Post post = Reddit.GetPost(ratingsPost);
+            string text = " **\\#**| " + leagueNames[0] + " | **GP** | **RATING** | **W/L** | **PPG** | **PTS** | **G** | **A**\n  ----|-------|-------|----|---|---|-----|---|---\n";
+
+            for (int j = 0; j < leagueNames.Count(); j++)
+            {                
+                int i = 1;
+                foreach (UserData d in UserSaveData.AllUserData.Values.Where(x => x.Division == j+1).OrderByDescending(x => x.Rating.Mean))
+                {
+                    int pts = d.Goals + d.Assists; 
+                    double ppg = Math.Round( (double)pts/ d.GamesPlayed, 2);
+                    double winLoss = Math.Round((double)d.Wins / (double)(d.GamesPlayed - d.Wins), 2);
+                    text += i + " | " + d.Name + " | " + d.GamesPlayed + " | "+ Math.Round(d.Rating.Mean, 2) * 100 + " | " + winLoss + " ("+ d.Wins + "-" + (d.GamesPlayed - d.Wins) + ")"+" | " + ppg + " | " + (d.Goals + d.Assists) + " | " + d.Goals + " | " + d.Assists + '\n';
+                    i++;
+                }
+                text += j < leagueNames.Count()-1 ? " **\\#** | " + leagueNames[j+1] + " | **GP** | **RATING** | **W/L** | **PPG** | **PTS** | **G** | **A**\n " : "";
+            }
+            
+           
+            post.EditText(text);
+        }
+
         public void PostGameResult(RankedGameReport report)
         {
-            string redtext =  "| RED  | G | A | CHANGE | NEW RATING  \n ----------|----------|----------|----------|----------\n";
-            string bluetext = "| BLUE | G | A | CHANGE | NEW RATING  \n ----------|----------|----------|----------|----------\n";
+            string redtext =  "| RED  | G | A | CHANGE | NEW RATING  \n ----------|----------|----------|:----------:|:----------:\n";
+            string bluetext = "| BLUE | G | A | CHANGE | NEW RATING  \n ----------|----------|----------|:----------:|:----------:\n";
           
             foreach(RankedGameReport.PlayerStatLine p in report.PlayerStats)
             {
@@ -92,7 +116,6 @@ namespace HQMRanked
 
             post += "\n\n";
             post += "MVP: " + report.MVP.Name + "\n\n";
-            post += "Match Quality: " + Math.Round(report.MatchQuality,3) + "\n\n";
             post += redtext + "\n\n";
             post += bluetext + "\n\n";
 

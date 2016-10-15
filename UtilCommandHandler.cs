@@ -16,8 +16,15 @@ namespace HQMRanked
                 if (cmd.Cmd == "postratings")
                 {
                     Chat.SendMessage("Updating rankings...");
-                    RedditReporter.Instance.UpdateRatings();
+                    DivisionManager.AssignDivisions();
+                    UserSaveData.SaveUserData();
+                    RedditReporter.Instance.PostLeagues();
                     Chat.SendMessage("Rankings updated.");
+                }
+                if (cmd.Cmd == "newaccounts")
+                {
+                    Util.NEW_ACCOUNTS_DISABLED = !Util.NEW_ACCOUNTS_DISABLED;
+                    Chat.SendMessage("NEW_ACCOUNTS_DISABLED=" + Util.NEW_ACCOUNTS_DISABLED);
                 }
                 if (cmd.Args.Length > 0)
                 {
@@ -91,7 +98,7 @@ namespace HQMRanked
                             Util.MERCY_RULE_DIFF = num;
                             Chat.SendMessage("MERCY_RULE_DIFF set to " + num);
                         }
-                    }
+                    }                
                 }              
             }
         }
