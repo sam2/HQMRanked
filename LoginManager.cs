@@ -70,7 +70,7 @@ namespace HQMRanked
             return false;
         }
 
-        static bool CreateNewUser(string name, string password)
+        public static bool CreateNewUser(string name, string password)
         {
             if(password == "")
             {
@@ -80,7 +80,7 @@ namespace HQMRanked
             UserData u;
             if (UserSaveData.AllUserData.TryGetValue(name, out u))
             {
-                Console.WriteLine(">> User " + u.Name + " already exists.");
+                Chat.SendMessage(">> User " + u.Name + " already exists.");
                 return false;
             }
             u = new UserData(name, password, Moserware.Skills.GameInfo.DefaultGameInfo.DefaultRating);

@@ -90,7 +90,18 @@ namespace HQMRanked
             foreach(RankedGameReport.PlayerStatLine p in report.PlayerStats)
             {
                 RankedPlayer rp = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == p.Name);
-                string statLine = "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + (rp.UserData.GamesPlayed < Util.LEADERBOARD_MIN_GAMES ? "PLACEMENT \n" : GetRatingString(report.OldRatings[p.Name], report.NewRatings[p.Name])) ;
+                string rankChange = "";
+                if (rp != null)
+                {
+                    if (rp.UserData.GamesPlayed < Util.LEADERBOARD_MIN_GAMES)
+                    {
+                        rankChange = "PLACEMENT \n";
+                    }
+                    else
+                        rankChange = GetRatingString(report.OldRatings[p.Name], report.NewRatings[p.Name]);
+                }
+                else rankChange = "LEFT GAME \n";
+                string statLine = "|" + p.Name + "|" + p.Goals + "|" + p.Assists + "|" + rankChange;
                 if(p.Team == HQMEditorDedicated.HQMTeam.Red)
                 {
                     redtext += statLine;

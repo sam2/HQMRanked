@@ -98,7 +98,13 @@ namespace HQMRanked
                             Util.MERCY_RULE_DIFF = num;
                             Chat.SendMessage("MERCY_RULE_DIFF set to " + num);
                         }
-                    }                
+                    }      
+                    else if (cmd.Cmd == "adduser" && cmd.Args.Count() > 1)
+                    {
+                        string name = cmd.Args[0];
+                        string pw = cmd.Args[1];
+                        LoginManager.CreateNewUser(name, pw);
+                    }          
                 }              
             }
         }
