@@ -28,7 +28,7 @@ namespace HQMRanked
 
             for(int i = 0; i < k_DivisionNumbers.Count(); i++)
             {
-                rankedPlayers.Skip(numSkipped).Take((int)k_DivisionNumbers[i]).ToList().ForEach(x => { x.Division = i + 1; });                
+                rankedPlayers.Skip(numSkipped).Take((int)Math.Round(k_DivisionNumbers[i])).ToList().ForEach(x => { x.Division = i + 1; });                
                 numSkipped += (int)k_DivisionNumbers[i];
             }
 

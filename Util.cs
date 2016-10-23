@@ -26,6 +26,6 @@ namespace HQMRanked
         public static int MIN_PLAYER_COUNT = 10;
         public static int MERCY_RULE_DIFF = 6;
 
-        public static bool NEW_ACCOUNTS_DISABLED = false;
+        public static bool NEW_ACCOUNTS_DISABLED = true;
     }
 }

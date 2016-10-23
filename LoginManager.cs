@@ -22,8 +22,7 @@ namespace HQMRanked
                 }
                 else if(Util.NEW_ACCOUNTS_DISABLED)
                 {
-                    Chat.SendMessage(cmd.Sender.Name + " - Creating new accounts is disabled.");
-                    Chat.SendMessage("Check the /r/hqmgames for details.");
+                    Chat.SendMessage("Join Error - "+cmd.Sender.Name + " - Sign up at reddit.com/r/hqmgames");
                 }
                 else
                 {
@@ -50,12 +49,13 @@ namespace HQMRanked
                 {
                     Chat.SendMessage(">> "+u.Name + " is already logged in.");
                 }
+                /*
                 else if(LoggedInPlayers.FirstOrDefault(x=> x.IP.SequenceEqual(player.IPAddress)) != null && !player.IsAdmin)
                 {
                     string name = LoggedInPlayers.FirstOrDefault(x => x.IP.SequenceEqual(player.IPAddress)).Name;
                     Chat.SendMessage(">> Failed to log in "+u.Name);
                     Chat.SendMessage(">> " + name + " is already logged in from that IP.");
-                }
+                }*/
                 else if(u.Password == password)
                 {
                     Chat.SendMessage(">> "+u.Name+" is now logged in.");

@@ -94,7 +94,8 @@ namespace HQMRanked
         static void InfoMessage()
         {
             Chat.SendMessage("             Logged in players: "+LoginManager.LoggedInPlayers.Count + " / "+Util.MIN_PLAYER_COUNT);
-            Chat.SendMessage("        Type /join <yourpassword> to play");          
+            Chat.SendMessage("        Type /join <yourpassword> to play");
+            Chat.SendMessage("        Create an account at r/hqmgames "); 
         }
 
         static void CrashReporter(object sender, UnhandledExceptionEventArgs args)

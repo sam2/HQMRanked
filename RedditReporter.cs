@@ -59,7 +59,7 @@ namespace HQMRanked
         }
 
         public void PostLeagues()
-        {
+        {            
             string[] leagueNames = { "**PUBSTAR**", "**ALLSTAR**", "**PRO**", "**ROOKIE**", "**JUNIOR**", "**PROSPECT**" };
             Post post = Reddit.GetPost(ratingsPost);
             string text = " **\\#**| " + leagueNames[0] + " | **GP** | **RATING** | **W/L** | **PPG** | **PTS** | **G** | **A**\n  ----|-------|-------|----|---|---|-----|---|---\n";
@@ -78,7 +78,8 @@ namespace HQMRanked
                 text += j < leagueNames.Count()-1 ? " **\\#** | " + leagueNames[j+1] + " | **GP** | **RATING** | **W/L** | **PPG** | **PTS** | **G** | **A**\n " : "";
             }
             
-           
+            text += "Minimum # of Games: " + Util.LEADERBOARD_MIN_GAMES;
+
             post.EditText(text);
         }
 
@@ -89,11 +90,12 @@ namespace HQMRanked
           
             foreach(RankedGameReport.PlayerStatLine p in report.PlayerStats)
             {
-                RankedPlayer rp = LoginManager.LoggedInPlayers.FirstOrDefault(x => x.Name == p.Name);
+                
                 string rankChange = "";
-                if (rp != null)
+                UserData data;
+                if (UserSaveData.AllUserData.TryGetValue(p.Name, out data))
                 {
-                    if (rp.UserData.GamesPlayed < Util.LEADERBOARD_MIN_GAMES)
+                    if (data.GamesPlayed < Util.LEADERBOARD_MIN_GAMES)
                     {
                         rankChange = "PLACEMENT \n";
                     }
